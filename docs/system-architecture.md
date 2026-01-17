@@ -25,6 +25,7 @@ graph TB
         API1[API Server 1<br/>Hono + Bun]
         API2[API Server 2<br/>Hono + Bun]
         WS[WebSocket Manager]
+        Worker[Email Worker<br/>BullMQ Processor]
     end
 
     subgraph "Authentication"
@@ -33,11 +34,15 @@ graph TB
 
     subgraph "Data Layer"
         PG[(PostgreSQL<br/>Primary DB)]
-        Redis[(Redis<br/>Pub/Sub + Cache)]
+        Redis[(Redis<br/>Pub/Sub + Cache + Queue)]
     end
 
     subgraph "Storage Layer"
         S3[S3 / R2<br/>File Storage]
+    end
+
+    subgraph "External Services"
+        SMTP[SMTP Server<br/>Gmail]
     end
 
     Web -->|HTTPS| Nginx
@@ -53,6 +58,8 @@ graph TB
     API1 <--> Redis
     API2 <--> Redis
     WS <--> Redis
+    Worker <--> Redis
+    Worker --> SMTP
     API1 --> S3
     API2 --> S3
 
@@ -581,6 +588,151 @@ bucket/
 
 ---
 
+## Email Infrastructure Architecture
+
+### Email Processing Flow
+
+```mermaid
+sequenceDiagram
+    participant API as API Server
+    participant Queue as BullMQ Queue
+    participant Worker as Email Worker
+    participant Email as EmailService
+    participant SMTP as Gmail SMTP
+    participant Redis
+
+    API->>Queue: Add email job (task assigned)
+    Queue->>Redis: Store job with priority
+    Worker->>Redis: Poll for jobs
+    Redis-->>Worker: Return job
+    Worker->>Worker: Render React Email template
+    Worker->>Email: send(to, subject, html, text)
+    Email->>Email: Validate email params
+    Email->>Email: Sanitize HTML/text
+    Email->>Email: Check circuit breaker
+    Email->>SMTP: Send via Nodemailer
+    SMTP-->>Email: Success/Failure
+    Email-->>Worker: Result
+    Worker->>Redis: Mark job complete/failed
+```
+
+### Email Service (`EmailService` class)
+
+**Features:**
+1. **Circuit Breaker Pattern**
+   - Prevents cascading failures
+   - Opens after 5 consecutive failures
+   - Half-open after 30s timeout
+   - Resets on successful send
+
+2. **Connection Pooling**
+   - Max 5 SMTP connections
+   - Reuses connections for efficiency
+   - Graceful cleanup on shutdown
+
+3. **Validation & Sanitization**
+   - Required: `to`, `subject`, `html` or `text`
+   - DOMPurify for HTML sanitization
+   - Plain text sanitization (trim, normalize)
+
+4. **Error Handling**
+   - Structured logging with full context
+   - Differentiates transient vs. permanent errors
+   - Throws on validation errors (prevents retry)
+
+### Queue System (`BullMQ`)
+
+**Configuration:**
+```typescript
+const emailQueue = new Queue("email", {
+  connection: redis,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: { age: 3600 }, // 1 hour TTL
+    removeOnFail: false, // Keep for debugging
+  },
+  limiter: {
+    max: 100, // Max jobs per duration
+    duration: 300000, // 5 minutes
+  },
+});
+```
+
+**Job Options:**
+- **Priority:** 1-10 (higher = sooner)
+- **JobId:** For idempotency (prevents duplicate emails)
+- **Attempts:** 3 retries with exponential backoff (5s, 15s, 45s)
+- **TTL:** Completed jobs removed after 1 hour
+
+### Email Worker
+
+**Responsibilities:**
+1. Poll BullMQ queue for email jobs
+2. Render React Email templates to HTML/text
+3. Send via `EmailService`
+4. Log errors with full context
+5. Retry on transient failures (SMTP timeouts, network errors)
+
+**Environment Variables:**
+```bash
+# SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=your@email.com
+SMTP_PASS=your_app_password
+SMTP_FROM=noreply@nexa-task.com
+SMTP_POOL_SIZE=5
+
+# Rate Limiting
+EMAIL_RATE_LIMIT_MAX=100
+EMAIL_RATE_LIMIT_DURATION_MS=300000
+```
+
+### Email Templates (React Email)
+
+**Structure:**
+```
+packages/shared/src/email-templates/
+├── base-layout.tsx         # Shared layout
+├── task-assigned.tsx       # Task assignment
+├── task-updated.tsx        # Task update
+└── comment-added.tsx       # New comment
+```
+
+**Design Principles:**
+- Responsive HTML (works in all email clients)
+- Inline CSS (no external stylesheets)
+- Plain text fallback
+- Action buttons with deep links
+- Consistent branding (logo, colors)
+
+### Scaling Considerations
+
+1. **Multiple Workers**
+   - Run multiple worker processes
+   - BullMQ ensures job distribution
+   - No duplicate processing (idempotency)
+
+2. **Rate Limiting**
+   - Prevents SMTP throttling
+   - 100 emails per 5 minutes (configurable)
+   - Priority queue for urgent emails
+
+3. **Circuit Breaker**
+   - Prevents SMTP overload
+   - Opens on repeated failures
+   - Auto-recovery after timeout
+
+4. **Redis Persistence**
+   - Jobs survive worker crashes
+   - AOF (Append-Only File) enabled
+   - Dead letter queue for failed jobs
+
+---
+
 ## Caching Strategy
 
 ### Multi-layer Caching
@@ -658,6 +810,7 @@ graph TB
    - WebSocket message broadcasting
    - Session storage
    - Cache layer
+   - Job queue (BullMQ for email workers)
 
 3. **Database Read Replicas**
    - Route read queries to replicas

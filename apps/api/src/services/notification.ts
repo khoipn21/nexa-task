@@ -3,9 +3,11 @@ import {
   notificationPreferences,
   notifications,
   userProjectPreferences,
+  users,
 } from '@repo/db/schema'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import { NotFoundError, ForbiddenError, ValidationError } from '../lib/errors'
+import { addEmailJob, type EmailJobData } from '../lib/queue'
 
 // Valid notification types (must match enum in schema)
 export const NOTIFICATION_TYPES = [
@@ -31,7 +33,21 @@ export interface CreateNotificationInput {
   entityId?: string
 }
 
-// Create notification
+// Email template data for queue jobs
+export interface EmailTemplateData {
+  taskTitle?: string
+  projectName?: string
+  actorName?: string
+  taskUrl?: string
+  dueDate?: string
+  changeType?: 'status' | 'priority' | 'due_date' | 'description'
+  oldValue?: string
+  newValue?: string
+  commentPreview?: string
+  isMention?: boolean
+}
+
+// Create notification and optionally queue email
 export async function createNotification(
   db: Database,
   input: CreateNotificationInput,
@@ -50,6 +66,58 @@ export async function createNotification(
     .returning()
 
   return notification
+}
+
+// Create notification with email (checks preferences and queues email)
+export async function createNotificationWithEmail(
+  db: Database,
+  input: CreateNotificationInput,
+  emailData: EmailTemplateData,
+) {
+  // Create in-app notification
+  const notification = await createNotification(db, input)
+  if (!notification) {
+    throw new Error('Failed to create notification')
+  }
+
+  // Check user preferences for email
+  const prefs = await getNotificationPreferences(db, input.userId)
+  if (!prefs) {
+    return { notification, emailQueued: false }
+  }
+
+  // Skip email if disabled or type not enabled
+  if (!prefs.emailEnabled) {
+    return { notification, emailQueued: false }
+  }
+
+  if (!prefs.enabledTypes.includes(input.type)) {
+    return { notification, emailQueued: false }
+  }
+
+  // Get user email
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, input.userId),
+    columns: { email: true },
+  })
+
+  if (!user?.email) {
+    return { notification, emailQueued: false }
+  }
+
+  // Queue email job
+  const jobData: EmailJobData = {
+    notificationId: notification.id,
+    userId: input.userId,
+    type: input.type,
+    recipientEmail: user.email,
+    subject: input.title,
+    templateData: emailData,
+  }
+
+  await addEmailJob(jobData)
+
+  return { notification, emailQueued: true }
 }
 
 // Get user notifications with pagination (optimized single query with counts)

@@ -38,15 +38,17 @@ nexa-task/
 - Redis pub/sub for real-time features
 - WebSocket manager for live updates
 - S3/R2 file upload support
-- Comprehensive test suite
+- Email infrastructure (Nodemailer + BullMQ)
+- Comprehensive test suite (32 unit tests)
 
-**File Count:** 36 files (29 TypeScript sources)
+**File Count:** 40 files (33 TypeScript sources)
 **Structure:**
-- `src/lib/` - Utilities (errors, Redis, WebSocket, validators)
+- `src/lib/` - Utilities (errors, Redis, WebSocket, validators, email, queue)
 - `src/middleware/` - Auth, RBAC, DB injection, rate limiting
-- `src/routes/` - API endpoints (workspaces, projects, tasks, comments)
-- `src/services/` - Business logic layer
-- `tests/` - Unit and integration tests
+- `src/routes/` - API endpoints (workspaces, projects, tasks, comments, notifications)
+- `src/services/` - Business logic layer (including notification service)
+- `src/workers/` - Background workers (email-worker)
+- `tests/` - Unit and integration tests (32 unit tests pass)
 
 #### `@repo/web` (apps/web/)
 **Purpose:** React frontend SPA with rich UI components
@@ -84,14 +86,15 @@ nexa-task/
 **File Count:** 20 files (17 schema files)
 
 #### `@repo/shared` (packages/shared/)
-**Purpose:** Shared types, validators, and RBAC logic
+**Purpose:** Shared types, validators, RBAC logic, email templates
 **Exports:**
 - Type definitions (User, Workspace, Project, Task, etc.)
 - Zod validation schemas (workspace, project, task)
 - RBAC permission system with helper functions
 - API response wrappers (ApiResponse, PaginatedResponse)
+- React Email templates (BaseLayout, TaskAssigned, TaskUpdated, CommentAdded)
 
-**Dependencies:** Zod 3.24
+**Dependencies:** Zod 3.24, @react-email/components, React 19
 
 #### `@repo/ui` (packages/ui/)
 **Purpose:** Shared UI component library
@@ -118,7 +121,9 @@ nexa-task/
 - **Validation:** Zod 3.24
 - **Storage:** AWS S3 / Cloudflare R2
 - **Webhooks:** Svix 1.84
-- **Testing:** Bun native test runner
+- **Email:** Nodemailer (Gmail SMTP)
+- **Queue:** BullMQ (Redis-backed)
+- **Testing:** Bun native test runner (32 unit tests pass)
 
 ### Frontend
 - **Bundler:** Vite 6.0
@@ -244,6 +249,33 @@ nexa-task/
 - Presence tracking
 - Room-based broadcasting
 
+### Email Infrastructure
+**Transport:** Nodemailer with Gmail SMTP
+**Queue:** BullMQ (Redis-backed)
+**Templates:** React Email components (TSX)
+
+**Features:**
+- Async email delivery with retry logic (3 attempts, exponential backoff)
+- Rate limiting (100 emails/min, configurable)
+- Idempotency keys prevent duplicates
+- Circuit breaker (5 failures → 1min cooldown)
+- Connection pooling (5 max connections)
+- STARTTLS enforcement
+- XSS sanitization for email content
+- Email injection prevention
+
+**Templates:**
+- BaseLayout (responsive HTML wrapper)
+- TaskAssigned (notify assignee)
+- TaskUpdated (notify watchers on status/priority changes)
+- CommentAdded (notify watchers on new comments)
+
+**Security:**
+- HTML entity escaping prevents XSS
+- Newline detection prevents email header injection
+- Email validation (RFC 5322 compliant)
+- SMTP credentials in env vars only
+
 ---
 
 ## Testing Infrastructure
@@ -320,17 +352,17 @@ nexa-task/
 
 | Metric | Count |
 |--------|-------|
-| Total files processed | 170+ |
-| Backend API files | 42 |
+| Total files processed | 180+ |
+| Backend API files | 40 (33 TS sources) |
 | Frontend web files | 70 |
 | Database schema files | 20 |
-| Shared package files | 12 |
-| Total lines of code | ~3.1M chars |
-| Total tokens (repomix) | 880K |
+| Shared package files | 16 (including 4 email templates) |
+| Total lines of code | ~3.2M chars |
+| Total tokens (repomix) | ~900K |
 | Component count (web) | ~23 |
 | Database tables | 13 core + relations |
 | API routes | ~48 endpoints |
-| Test files | ~12+ |
+| Test files | ~14 (32 unit tests pass) |
 
 ---
 
