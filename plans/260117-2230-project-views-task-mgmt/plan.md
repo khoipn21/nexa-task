@@ -19,7 +19,7 @@ Complete 4 missing frontend features + add notification system (in-app + email) 
 | 1 | [Database & Backend Foundation](./phase-01-database-backend-foundation.md) | ✅ Done (2026-01-17) | No |
 | 2 | [Email Infrastructure](./phase-02-email-infrastructure.md) | ✅ Done (2026-01-18) | Yes (2,3) |
 | 3 | [In-App Notifications](./phase-03-inapp-notifications.md) | ✅ Done (2026-01-18) | Yes (2,3) |
-| 4 | [View Preference Sync](./phase-04-view-preference-sync.md) | ⬜ Pending | Yes (4,5,6,7) |
+| 4 | [View Preference Sync](./phase-04-view-preference-sync.md) | ✅ Done (2026-01-18) | Yes (4,5,6,7) |
 | 5 | [Workflow Settings UI](./phase-05-workflow-settings-ui.md) | ⬜ Pending | Yes (4,5,6,7) |
 | 6 | [Watchers UI](./phase-06-watchers-ui.md) | ⬜ Pending | Yes (4,5,6,7) |
 | 7 | [Dependency Picker + File Upload](./phase-07-dependency-picker-file-upload.md) | ⬜ Pending | Yes (4,5,6,7) |
@@ -43,6 +43,7 @@ Phase 1 (DB/Backend) ──┬── Phase 2 (Email) ─────┐
 - [Email Notifications Research](../reports/researcher-260117-2237-email-notifications.md)
 - [In-App Notifications Research](../reports/research-260117-2230-inapp-notifications.md)
 - [UI Components Research](../reports/researcher-260117-2237-ui-components.md)
+- [Phase 4 Code Review](./reports/code-reviewer-260118-0315-phase-04-view-preference.md)
 
 ## Success Criteria
 
@@ -54,7 +55,7 @@ Phase 1 (DB/Backend) ──┬── Phase 2 (Email) ─────┐
 - [x] React Email templates (task-assigned, task-updated, comment-added, base-layout)
 - [x] Email worker with rate limiting (100/min), retries (3x), circuit breaker
 - [x] All Phase 2 unit tests passing (32/32 total)
-- [ ] View preference syncs across devices via Redis
+- [x] View preference syncs across devices via Redis
 - [ ] Watchers can subscribe/unsubscribe from tasks
 - [x] Watchers receive in-app notifications for task changes
 - [ ] Watchers receive email notifications (configurable)

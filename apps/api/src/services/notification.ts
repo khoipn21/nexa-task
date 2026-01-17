@@ -9,6 +9,13 @@ import { and, desc, eq, sql } from 'drizzle-orm'
 import { NotFoundError, ForbiddenError, ValidationError } from '../lib/errors'
 import { publishNotification } from '../lib/notification-publisher'
 import { addEmailJob, type EmailJobData } from '../lib/queue'
+import { redis, isRedisConnected } from '../lib/redis'
+
+// Redis cache TTL for view preferences
+// 1 hour balances freshness vs DB load - preferences change infrequently
+const VIEW_PREF_CACHE_TTL = 3600
+const getViewPrefCacheKey = (userId: string, projectId: string) =>
+  `view-pref:${userId}:${projectId}`
 
 // Valid notification types (must match enum in schema)
 export const NOTIFICATION_TYPES = [
@@ -304,12 +311,27 @@ export async function updateNotificationPreferences(
   return created
 }
 
-// Get project view preference
+// Get project view preference (with Redis caching)
 export async function getProjectViewPreference(
   db: Database,
   userId: string,
   projectId: string,
 ) {
+  const cacheKey = getViewPrefCacheKey(userId, projectId)
+
+  // Try Redis cache first
+  if (isRedisConnected()) {
+    try {
+      const cached = await redis.get(cacheKey)
+      if (cached) {
+        return { viewMode: cached as 'kanban' | 'list' | 'calendar' }
+      }
+    } catch (error) {
+      console.warn('[ViewPref] Redis read error, fallback to DB:', error)
+    }
+  }
+
+  // Fetch from DB
   const pref = await db.query.userProjectPreferences.findFirst({
     where: and(
       eq(userProjectPreferences.userId, userId),
@@ -317,10 +339,21 @@ export async function getProjectViewPreference(
     ),
   })
 
-  return pref ?? { viewMode: 'kanban' as const }
+  const viewMode = pref?.viewMode ?? 'kanban'
+
+  // Cache in Redis
+  if (isRedisConnected()) {
+    try {
+      await redis.setex(cacheKey, VIEW_PREF_CACHE_TTL, viewMode)
+    } catch (error) {
+      console.warn('[ViewPref] Redis write error:', error)
+    }
+  }
+
+  return { viewMode }
 }
 
-// Set project view preference
+// Set project view preference (with Redis caching)
 export async function setProjectViewPreference(
   db: Database,
   userId: string,
@@ -334,19 +367,31 @@ export async function setProjectViewPreference(
     ),
   })
 
+  let result
   if (existing) {
     const [updated] = await db
       .update(userProjectPreferences)
       .set({ viewMode, updatedAt: new Date() })
       .where(eq(userProjectPreferences.id, existing.id))
       .returning()
-    return updated
+    result = updated
+  } else {
+    const [created] = await db
+      .insert(userProjectPreferences)
+      .values({ userId, projectId, viewMode })
+      .returning()
+    result = created
   }
 
-  const [created] = await db
-    .insert(userProjectPreferences)
-    .values({ userId, projectId, viewMode })
-    .returning()
+  // Update Redis cache
+  const cacheKey = getViewPrefCacheKey(userId, projectId)
+  if (isRedisConnected()) {
+    try {
+      await redis.setex(cacheKey, VIEW_PREF_CACHE_TTL, viewMode)
+    } catch (error) {
+      console.warn('[ViewPref] Redis cache update error:', error)
+    }
+  }
 
-  return created
+  return result
 }

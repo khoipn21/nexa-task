@@ -1,0 +1,68 @@
+import { CalendarView } from '@/components/project-views/calendar/calendar-view'
+import { KanbanBoard } from '@/components/project-views/kanban/kanban-board'
+import { TaskTable } from '@/components/project-views/list/task-table'
+import { ViewSwitcher } from '@/components/project-views/view-switcher'
+import { useProject } from '@/hooks/use-projects'
+import { useViewPreference } from '@/hooks/use-view-preference'
+import { Container, Group, Skeleton, Stack, Text, Title } from '@mantine/core'
+import { useParams } from 'react-router'
+
+// Default workflow statuses if project doesn't have them yet
+const defaultStatuses = [
+  { id: 'backlog', name: 'Backlog', color: '#868e96' },
+  { id: 'todo', name: 'To Do', color: '#228be6' },
+  { id: 'in-progress', name: 'In Progress', color: '#fab005' },
+  { id: 'review', name: 'Review', color: '#be4bdb' },
+  { id: 'done', name: 'Done', color: '#40c057' },
+]
+
+export default function ProjectDetail() {
+  const { id } = useParams()
+  const { data: project, isLoading } = useProject(id)
+  const { viewMode } = useViewPreference(id)
+
+  if (isLoading) {
+    return (
+      <Container size="lg">
+        <Skeleton height={40} mb="xl" />
+        <Skeleton height={400} />
+      </Container>
+    )
+  }
+
+  if (!project) {
+    return (
+      <Container size="lg">
+        <Text c="dimmed">Project not found</Text>
+      </Container>
+    )
+  }
+
+  const statuses = project.workflowStatuses?.length
+    ? project.workflowStatuses
+    : defaultStatuses
+
+  return (
+    <Container size="lg" className="h-full">
+      <Stack gap="lg" className="h-full">
+        <Group justify="space-between">
+          <div>
+            <Title order={2}>{project.name}</Title>
+            {project.description && (
+              <Text c="dimmed" size="sm">
+                {project.description}
+              </Text>
+            )}
+          </div>
+          {id && <ViewSwitcher projectId={id} />}
+        </Group>
+
+        {viewMode === 'kanban' && id && (
+          <KanbanBoard projectId={id} statuses={statuses} />
+        )}
+        {viewMode === 'list' && id && <TaskTable projectId={id} />}
+        {viewMode === 'calendar' && id && <CalendarView projectId={id} />}
+      </Stack>
+    </Container>
+  )
+}

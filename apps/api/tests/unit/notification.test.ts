@@ -380,7 +380,7 @@ describe('Notification Service', () => {
         'project-1',
       )
 
-      expect(result).toEqual(mockProjectPreference)
+      expect(result.viewMode).toBe(mockProjectPreference.viewMode)
     })
 
     it('returns default kanban view if no preference exists', async () => {
