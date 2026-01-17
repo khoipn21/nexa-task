@@ -1,6 +1,6 @@
 # Phase 3: In-App Notifications
 
-**Priority:** High | **Status:** ⬜ Pending | **Depends on:** Phase 1 | **Parallel with:** Phase 2
+**Priority:** High | **Status:** ✅ Done | **Depends on:** Phase 1 | **Parallel with:** Phase 2
 
 ## Context Links
 
@@ -66,23 +66,41 @@ Task Event → Notification Service → PostgreSQL (persist)
 
 ## Todo List
 
-- [ ] Create Redis notification publisher
-- [ ] Update notification service with pub/sub
-- [ ] Update WebSocket to handle notifications
-- [ ] Create useNotifications hook
-- [ ] Create NotificationBell component
-- [ ] Create NotificationItem component
-- [ ] Create NotificationList component
-- [ ] Add bell to header
-- [ ] Implement navigation on click
+- [x] Create Redis notification publisher
+- [x] Update notification service with pub/sub
+- [x] Update WebSocket to handle notifications
+- [x] Create useNotifications hook
+- [x] Create NotificationBell component
+- [x] Create NotificationItem component
+- [x] Create NotificationList component
+- [x] Add bell to header
+- [x] Implement navigation on click
+- [x] Fix type error `notification.isRead` → `notification.read`
+- [x] Fix React hook deps (moved connect inside useEffect)
+- [x] Implement Redis subscription cleanup
+- [x] Add try-catch around WebSocket publish
 
 ## Success Criteria
 
-- [ ] Creating notification shows toast in real-time
-- [ ] Bell shows unread count badge
-- [ ] Clicking notification marks as read
-- [ ] Clicking notification navigates to task/project
-- [ ] Mark all as read clears badge
+- [x] Creating notification shows toast in real-time
+- [x] Bell shows unread count badge
+- [x] Clicking notification marks as read
+- [x] Clicking notification navigates to task/project
+- [x] Mark all as read clears badge
+
+## Code Review
+
+**Date:** 2026-01-18 03:00
+**Reviewer:** code-reviewer
+**Score:** 8.5/10
+**Status:** ✅ Approved
+
+**Fixes Applied:**
+1. Fixed type error: `notification.isRead` → `notification.read`
+2. Fixed React hook dependency loop (moved connect inside useEffect)
+3. Implemented Redis subscription cleanup with `redisSub.off()`
+4. Increased reconnect attempts to 10 (~17 min total)
+5. Added try-catch around publishNotification call
 
 ## Risk Assessment
 

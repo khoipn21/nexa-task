@@ -18,7 +18,7 @@ Complete 4 missing frontend features + add notification system (in-app + email) 
 |---|-------|--------|----------|
 | 1 | [Database & Backend Foundation](./phase-01-database-backend-foundation.md) | ✅ Done (2026-01-17) | No |
 | 2 | [Email Infrastructure](./phase-02-email-infrastructure.md) | ✅ Done (2026-01-18) | Yes (2,3) |
-| 3 | [In-App Notifications](./phase-03-inapp-notifications.md) | ⬜ Pending | Yes (2,3) |
+| 3 | [In-App Notifications](./phase-03-inapp-notifications.md) | ✅ Done (2026-01-18) | Yes (2,3) |
 | 4 | [View Preference Sync](./phase-04-view-preference-sync.md) | ⬜ Pending | Yes (4,5,6,7) |
 | 5 | [Workflow Settings UI](./phase-05-workflow-settings-ui.md) | ⬜ Pending | Yes (4,5,6,7) |
 | 6 | [Watchers UI](./phase-06-watchers-ui.md) | ⬜ Pending | Yes (4,5,6,7) |
@@ -56,7 +56,7 @@ Phase 1 (DB/Backend) ──┬── Phase 2 (Email) ─────┐
 - [x] All Phase 2 unit tests passing (32/32 total)
 - [ ] View preference syncs across devices via Redis
 - [ ] Watchers can subscribe/unsubscribe from tasks
-- [ ] Watchers receive in-app notifications for task changes
+- [x] Watchers receive in-app notifications for task changes
 - [ ] Watchers receive email notifications (configurable)
 - [ ] Dependencies can be added via task picker modal
 - [ ] Files can be uploaded via drag-drop dropzone

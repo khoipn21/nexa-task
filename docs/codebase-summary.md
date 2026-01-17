@@ -248,6 +248,27 @@ nexa-task/
 - Real-time task updates
 - Presence tracking
 - Room-based broadcasting
+- Auto-join user notification rooms (`user:{userId}`)
+
+### In-App Notifications
+**Transport:** Redis pub/sub + WebSocket fallback
+**Storage:** PostgreSQL notifications table
+**Frontend:** TanStack Query with WebSocket invalidation
+
+**Features:**
+- Real-time notification delivery via Redis pub/sub
+- Fallback to direct WebSocket if Redis unavailable
+- Notification bell with unread count badge
+- Click-to-navigate for task/project entities
+- Mark as read (single/bulk)
+- Exponential backoff reconnection (10 attempts, max 60s)
+- Auto-join user rooms on WebSocket connect
+
+**Components:**
+- `NotificationBell` (Mantine Indicator + Popover)
+- `NotificationItem` (icon, time, click handler)
+- `NotificationList` (scrollable, loading/empty states)
+- `useNotifications` hook (React Query + WebSocket)
 
 ### Email Infrastructure
 **Transport:** Nodemailer with Gmail SMTP

@@ -7,6 +7,7 @@ import {
 } from '@repo/db/schema'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import { NotFoundError, ForbiddenError, ValidationError } from '../lib/errors'
+import { publishNotification } from '../lib/notification-publisher'
 import { addEmailJob, type EmailJobData } from '../lib/queue'
 
 // Valid notification types (must match enum in schema)
@@ -64,6 +65,24 @@ export async function createNotification(
       entityId: input.entityId,
     })
     .returning()
+
+  // Publish to WebSocket for real-time delivery (non-blocking)
+  if (notification) {
+    try {
+      await publishNotification(input.userId, {
+        id: notification.id,
+        type: notification.type,
+        message: notification.message,
+        entityType: notification.entityType,
+        entityId: notification.entityId,
+        createdAt: notification.createdAt,
+        isRead: notification.read,
+      })
+    } catch (error) {
+      // Log but don't fail - DB write succeeded, real-time is best-effort
+      console.error('Failed to publish notification via WebSocket:', error)
+    }
+  }
 
   return notification
 }
