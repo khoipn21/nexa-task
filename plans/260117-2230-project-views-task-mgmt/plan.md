@@ -21,7 +21,7 @@ Complete 4 missing frontend features + add notification system (in-app + email) 
 | 3 | [In-App Notifications](./phase-03-inapp-notifications.md) | ✅ Done (2026-01-18) | Yes (2,3) |
 | 4 | [View Preference Sync](./phase-04-view-preference-sync.md) | ✅ Done (2026-01-18) | Yes (4,5,6,7) |
 | 5 | [Workflow Settings UI](./phase-05-workflow-settings-ui.md) | ✅ Done (2026-01-18) | Yes (4,5,6,7) |
-| 6 | [Watchers UI](./phase-06-watchers-ui.md) | ⬜ Pending | Yes (4,5,6,7) |
+| 6 | [Watchers UI](./phase-06-watchers-ui.md) | ✅ Done (2026-01-18) | Yes (4,5,6,7) |
 | 7 | [Dependency Picker + File Upload](./phase-07-dependency-picker-file-upload.md) | ⬜ Pending | Yes (4,5,6,7) |
 | 8 | [Integration & Testing](./phase-08-integration-testing.md) | ⬜ Pending | No |
 
@@ -57,9 +57,9 @@ Phase 1 (DB/Backend) ──┬── Phase 2 (Email) ─────┐
 - [x] All Phase 2 unit tests passing (32/32 total)
 - [x] View preference syncs across devices via Redis
 - [x] Workflow statuses can be managed in project settings
-- [ ] Watchers can subscribe/unsubscribe from tasks
+- [x] Watchers can subscribe/unsubscribe from tasks
 - [x] Watchers receive in-app notifications for task changes
-- [ ] Watchers receive email notifications (configurable)
+- [x] Watchers receive email notifications (configurable)
 - [ ] Dependencies can be added via task picker modal
 - [ ] Files can be uploaded via drag-drop dropzone
 - [ ] Workflow statuses can be managed in project settings

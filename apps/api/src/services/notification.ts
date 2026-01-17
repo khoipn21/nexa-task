@@ -17,6 +17,16 @@ const VIEW_PREF_CACHE_TTL = 3600
 const getViewPrefCacheKey = (userId: string, projectId: string) =>
   `view-pref:${userId}:${projectId}`
 
+// Sanitize string to prevent XSS - escapes HTML entities
+function sanitizeText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 // Valid notification types (must match enum in schema)
 export const NOTIFICATION_TYPES = [
   'task_assigned',
@@ -60,13 +70,17 @@ export async function createNotification(
   db: Database,
   input: CreateNotificationInput,
 ) {
+  // Sanitize user-provided content to prevent XSS
+  const sanitizedTitle = sanitizeText(input.title)
+  const sanitizedMessage = sanitizeText(input.message)
+
   const [notification] = await db
     .insert(notifications)
     .values({
       userId: input.userId,
       type: input.type,
-      title: input.title,
-      message: input.message,
+      title: sanitizedTitle,
+      message: sanitizedMessage,
       data: input.data ?? {},
       entityType: input.entityType,
       entityId: input.entityId,

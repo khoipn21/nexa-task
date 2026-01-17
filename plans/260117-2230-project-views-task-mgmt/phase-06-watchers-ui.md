@@ -1,11 +1,12 @@
 # Phase 6: Watchers UI
 
-**Priority:** High | **Status:** ⬜ Pending | **Depends on:** Phases 1,2,3 | **Parallel with:** Phases 4,5,7
+**Priority:** High | **Status:** ✅ Complete | **Depends on:** Phases 1,2,3 | **Parallel with:** Phases 4,5,7
 
 ## Context Links
 
 - [UI Components Research](../reports/researcher-260117-2237-ui-components.md)
 - [Scout Report](../reports/scout-260117-2230-project-views-task-mgmt.md) - Backend CRUD exists
+- [Code Review](../reports/code-reviewer-260118-0357-phase-06-watchers-ui.md) - 6.5/10, needs fixes
 
 ## Overview
 
@@ -72,14 +73,20 @@ Task Detail Sidebar
 
 ## Todo List
 
-- [ ] Create useTaskWatchers hook
-- [ ] Create TaskWatchers component
-- [ ] Add watch/unwatch button
-- [ ] Add avatar stack display
-- [ ] Add watcher management popover
-- [ ] Update task-sidebar
-- [ ] Wire notification triggers in backend
-- [ ] Test notification delivery
+- [x] Create useTaskWatchers hook
+- [x] Create TaskWatchers component
+- [x] Add watch/unwatch button
+- [x] Add avatar stack display
+- [x] Add watcher management popover
+- [x] Update task-sidebar
+- [x] Wire notification triggers in backend
+- [ ] **CRITICAL:** Fix missing addedById in route (routes/tasks.ts:182)
+- [ ] **CRITICAL:** Fix stale closure in useToggleWatch (race condition)
+- [ ] **HIGH:** Add workspace membership validation
+- [ ] **HIGH:** Add error handling UI for mutations
+- [ ] **MEDIUM:** Sanitize notification messages (XSS prevention)
+- [ ] **MEDIUM:** Implement optimistic updates
+- [ ] Test notification delivery (blocked by critical fixes)
 
 ## Success Criteria
 
