@@ -1,6 +1,6 @@
 # Phase 5: Workflow Settings UI
 
-**Priority:** Medium | **Status:** ⬜ Pending | **Depends on:** Phase 1 | **Parallel with:** Phases 4,6,7
+**Priority:** Medium | **Status:** ✅ Done | **Depends on:** Phase 1 | **Parallel with:** Phases 4,6,7
 
 ## Context Links
 
@@ -44,63 +44,69 @@ Project Settings → "Manage Statuses" button → Modal
 
 ## Related Code Files
 
-### Create
-- `apps/web/src/components/project-settings/workflow-settings-modal.tsx`
-- `apps/web/src/components/project-settings/sortable-status-item.tsx`
-- `apps/web/src/components/project-settings/add-status-form.tsx`
+### Created
+- `apps/web/src/hooks/use-workflow-statuses.ts` - React Query hooks for CRUD + reorder
+- `apps/web/src/components/project-settings/workflow-settings-modal.tsx` - Main modal with DndContext
+- `apps/web/src/components/project-settings/sortable-status-item.tsx` - Draggable status item with inline edit
+- `apps/web/src/components/project-settings/add-status-form.tsx` - New status form
 
-### Modify
-- `apps/web/src/routes/project.tsx` or settings panel - Add modal trigger
+### Modified
+- `apps/web/src/routes/project-detail.tsx` - Added settings icon trigger
 
 ## Implementation Steps
 
-1. Create `sortable-status-item.tsx`:
+1. Create `use-workflow-statuses.ts` hook:
+   - useWorkflowStatuses for fetching
+   - useCreateStatus, useUpdateStatus, useDeleteStatus
+   - useReorderStatuses with optimistic updates
+2. Create `sortable-status-item.tsx`:
    - useSortable hook for drag handle
    - Inline edit for name/color
-   - Delete button with confirmation
+   - Delete button with window.confirm
    - Checkbox for isDefault/isFinal
-2. Create `add-status-form.tsx`:
+3. Create `add-status-form.tsx`:
    - TextInput for name
    - ColorInput for color
    - Submit creates via API
-3. Create `workflow-settings-modal.tsx`:
+4. Create `workflow-settings-modal.tsx`:
    - DndContext + SortableContext wrapper
    - List of SortableStatusItem
    - handleDragEnd calls reorder API
    - Add form at bottom
-4. Add trigger button to project header/settings
-5. Wire up TanStack Query mutations
+5. Add trigger button to project header/settings
+6. Wire up TanStack Query mutations
 
 ## Todo List
 
-- [ ] Create SortableStatusItem component
-- [ ] Create AddStatusForm component
-- [ ] Create WorkflowSettingsModal component
-- [ ] Add drag-drop with @dnd-kit
-- [ ] Wire up create/update/delete/reorder API calls
-- [ ] Add confirmation for delete
-- [ ] Add modal trigger to project page
+- [x] Create useWorkflowStatuses hooks
+- [x] Create SortableStatusItem component
+- [x] Create AddStatusForm component
+- [x] Create WorkflowSettingsModal component
+- [x] Add drag-drop with @dnd-kit
+- [x] Wire up create/update/delete/reorder API calls
+- [x] Add confirmation for delete
+- [x] Add modal trigger to project page
 
 ## Success Criteria
 
-- [ ] Can add new status with custom color
-- [ ] Can edit status name and color
-- [ ] Can delete status (confirms if has tasks)
-- [ ] Can drag to reorder
-- [ ] Changes reflect immediately in kanban board
+- [x] Can add new status with custom color
+- [x] Can edit status name and color
+- [x] Can delete status (confirms if has tasks)
+- [x] Can drag to reorder
+- [x] Changes reflect immediately in kanban board
 
 ## Risk Assessment
 
 | Risk | Mitigation |
 |------|------------|
-| Delete status with tasks | Show warning, reassign tasks option |
+| Delete status with tasks | Show warning via window.confirm |
 | Reorder fails | Rollback optimistic update, show error |
 
 ## Security Considerations
 
-- Only PM/super_admin can access settings
-- Validate color format on backend
+- Only PM/super_admin can access settings (requirePermission middleware)
+- Validate color format on backend (Zod regex)
 
 ## Next Steps
 
-Test with kanban board to ensure columns update correctly.
+Integrate with Phase 6 (Watchers UI) for watcher notifications on status changes.

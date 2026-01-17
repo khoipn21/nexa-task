@@ -2,9 +2,12 @@ import { CalendarView } from '@/components/project-views/calendar/calendar-view'
 import { KanbanBoard } from '@/components/project-views/kanban/kanban-board'
 import { TaskTable } from '@/components/project-views/list/task-table'
 import { ViewSwitcher } from '@/components/project-views/view-switcher'
+import { WorkflowSettingsModal } from '@/components/project-settings/workflow-settings-modal'
 import { useProject } from '@/hooks/use-projects'
 import { useViewPreference } from '@/hooks/use-view-preference'
-import { Container, Group, Skeleton, Stack, Text, Title } from '@mantine/core'
+import { ActionIcon, Container, Group, Skeleton, Stack, Text, Title, Tooltip } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { IconSettings } from '@tabler/icons-react'
 import { useParams } from 'react-router'
 
 // Default workflow statuses if project doesn't have them yet
@@ -20,6 +23,7 @@ export default function ProjectDetail() {
   const { id } = useParams()
   const { data: project, isLoading } = useProject(id)
   const { viewMode } = useViewPreference(id)
+  const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false)
 
   if (isLoading) {
     return (
@@ -54,7 +58,16 @@ export default function ProjectDetail() {
               </Text>
             )}
           </div>
-          {id && <ViewSwitcher projectId={id} />}
+          {id && (
+            <Group gap="sm">
+              <ViewSwitcher projectId={id} />
+              <Tooltip label="Workflow settings">
+                <ActionIcon variant="subtle" size="lg" onClick={openSettings}>
+                  <IconSettings size={20} />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          )}
         </Group>
 
         {viewMode === 'kanban' && id && (
@@ -63,6 +76,14 @@ export default function ProjectDetail() {
         {viewMode === 'list' && id && <TaskTable projectId={id} />}
         {viewMode === 'calendar' && id && <CalendarView projectId={id} />}
       </Stack>
+
+      {id && (
+        <WorkflowSettingsModal
+          projectId={id}
+          opened={settingsOpened}
+          onClose={closeSettings}
+        />
+      )}
     </Container>
   )
 }
