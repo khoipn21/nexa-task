@@ -5,6 +5,7 @@ import auth from './auth'
 import comments from './comments'
 import dashboard from './dashboard'
 import health from './health'
+import invitations from './invitations'
 import notifications from './notifications'
 import projects from './projects'
 import tasks, { attachmentsRouter, projectTasks } from './tasks'
@@ -30,6 +31,7 @@ routes.route('/api/tasks', tasks) // For /tasks/:id
 routes.route('/api/attachments', attachmentsRouter) // For /attachments/:id
 routes.route('/api', comments) // For /tasks/:id/comments and /comments/:id
 routes.route('/api/notifications', notifications) // For /notifications/*
+routes.route('/api/invitations', invitations) // For /invitations/*
 routes.route('/api/user-settings', userSettings) // For /user-settings/*
 
 export default routes

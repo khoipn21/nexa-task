@@ -1,6 +1,7 @@
 import { AppShellLayout } from '@/components/layouts/app-shell'
 import { SignIn, SignUp, SignedIn, SignedOut } from '@clerk/clerk-react'
 import { Navigate, createBrowserRouter } from 'react-router'
+import AcceptInvite from './accept-invite'
 import Dashboard from './dashboard'
 import ProjectDetail from './project-detail'
 import Projects from './projects'
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
         <SignUp routing="path" path="/sign-up" />
       </div>
     ),
+  },
+  {
+    path: '/accept-invite',
+    element: <AcceptInvite />,
   },
   {
     path: '/',
