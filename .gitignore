@@ -116,3 +116,4 @@ secrets.json
 # .claude/skills/.venv/
 .env.production
 koyeb.yaml
+.vercel
