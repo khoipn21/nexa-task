@@ -25,6 +25,25 @@ export const inviteMemberSchema = z.object({
   role: z.enum(['super_admin', 'pm', 'member', 'guest']).default('member'),
 })
 
+export const createInvitationSchema = z.object({
+  email: z
+    .string()
+    .email()
+    .transform((e) => e.toLowerCase().trim()),
+  role: z.enum(['super_admin', 'pm', 'member', 'guest']).default('member'),
+})
+
+export const bulkInvitationSchema = z.object({
+  emails: z
+    .array(z.string().email())
+    .min(1)
+    .max(20)
+    .transform((emails) => emails.map((e) => e.toLowerCase().trim())),
+  role: z.enum(['super_admin', 'pm', 'member', 'guest']).default('member'),
+})
+
 export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>
 export type UpdateWorkspaceInput = z.infer<typeof updateWorkspaceSchema>
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>
+export type CreateInvitationInput = z.infer<typeof createInvitationSchema>
+export type BulkInvitationInput = z.infer<typeof bulkInvitationSchema>

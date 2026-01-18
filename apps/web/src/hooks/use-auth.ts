@@ -11,12 +11,12 @@ export function useAuth() {
   const { user } = useUser()
   const { organization } = useOrganization()
 
-  // Sync token to API client
+  // Sync token getter to API client
   useEffect(() => {
     if (isSignedIn) {
-      getToken().then((token) => api.setToken(token))
+      api.setTokenGetter(() => getToken())
     } else {
-      api.setToken(null)
+      api.setTokenGetter(null)
     }
   }, [isSignedIn, getToken])
 

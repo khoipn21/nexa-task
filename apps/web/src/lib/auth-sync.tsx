@@ -10,17 +10,16 @@ export function AuthSync({ children }: { children: ReactNode }) {
     if (!isLoaded) return
 
     if (isSignedIn) {
-      getToken().then((token) => {
-        api.setToken(token)
-        setTokenReady(true)
-      })
+      // Set token getter that fetches fresh token on each request
+      api.setTokenGetter(() => getToken())
+      setTokenReady(true)
     } else {
-      api.setToken(null)
+      api.setTokenGetter(null)
       setTokenReady(true)
     }
   }, [isLoaded, isSignedIn, getToken])
 
-  // Wait for auth to load and token to sync before rendering children
+  // Wait for auth to load and token getter to be set before rendering children
   if (!isLoaded || !tokenReady) {
     return null
   }

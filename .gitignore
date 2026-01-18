@@ -14,7 +14,7 @@ coverage.html
 
 # Go build artifacts
 /bin/
-/dist/
+dist/
 /build/
 /tmp/
 

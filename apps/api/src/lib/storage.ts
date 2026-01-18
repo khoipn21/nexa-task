@@ -26,26 +26,49 @@ export const ALLOWED_MIME_TYPES = new Set([
 // Max file size: 10MB
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-// S3 client - lazy initialization
+// S3-compatible client (works with AWS S3 or Cloudflare R2) - lazy initialization
 let s3Client: S3Client | null = null
 
 function getS3Client(): S3Client {
   if (!s3Client) {
-    s3Client = new S3Client({
-      region: process.env.AWS_REGION || 'us-east-1',
-      credentials: process.env.AWS_ACCESS_KEY_ID
-        ? {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-          }
-        : undefined,
-    })
+    // Check for Cloudflare R2 config first, fall back to AWS S3
+    const isR2 = !!process.env.R2_ENDPOINT
+
+    if (isR2) {
+      s3Client = new S3Client({
+        region: 'auto',
+        endpoint: process.env.R2_ENDPOINT,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        },
+      })
+    } else {
+      s3Client = new S3Client({
+        region: process.env.AWS_REGION || 'us-east-1',
+        credentials: process.env.AWS_ACCESS_KEY_ID
+          ? {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+            }
+          : undefined,
+      })
+    }
   }
   return s3Client
 }
 
 function getBucket(): string {
-  return process.env.S3_BUCKET || 'nexa-task-uploads'
+  return process.env.R2_BUCKET_NAME || process.env.S3_BUCKET || 'nexa-task-uploads'
+}
+
+function getPublicUrl(key: string): string {
+  // Use R2 public URL if configured, otherwise construct S3 URL
+  if (process.env.R2_PUBLIC_URL) {
+    return `${process.env.R2_PUBLIC_URL}/${key}`
+  }
+  const bucket = getBucket()
+  return `https://${bucket}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`
 }
 
 // Generate a unique storage key for a file
@@ -113,7 +136,7 @@ export async function getUploadPresignedUrl(
   })
 
   const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 })
-  const publicUrl = `https://${bucket}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`
+  const publicUrl = getPublicUrl(key)
 
   return { uploadUrl, publicUrl }
 }
@@ -162,5 +185,5 @@ export async function uploadFile(
     }),
   )
 
-  return `https://${bucket}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`
+  return getPublicUrl(key)
 }

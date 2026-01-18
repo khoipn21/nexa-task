@@ -2,6 +2,7 @@ import { InviteMemberModal } from '@/components/workspace-settings/invite-member
 import { PendingInvitations } from '@/components/workspace-settings/pending-invitations'
 import { useAuth } from '@/hooks/use-auth'
 import { useWorkspaces } from '@/hooks/use-workspace'
+import { Protect } from '@clerk/clerk-react'
 import {
   Button,
   Divider,
@@ -71,34 +72,45 @@ export default function Settings() {
     <Stack gap="lg">
       <Title order={2}>Settings</Title>
 
-      {/* Team Members Section */}
-      <Paper p="md" radius="md" withBorder>
-        <Stack gap="md">
-          <div>
-            <Title order={4}>Team Members</Title>
-            <Text size="sm" c="dimmed">
-              Invite and manage workspace members
+      {/* Team Members Section - Only visible to admins */}
+      <Protect
+        condition={(has) => has({ role: 'org:admin' })}
+        fallback={
+          <Paper p="md" radius="md" withBorder>
+            <Text c="dimmed">
+              Contact an administrator to manage workspace invitations.
             </Text>
-          </div>
+          </Paper>
+        }
+      >
+        <Paper p="md" radius="md" withBorder>
+          <Stack gap="md">
+            <div>
+              <Title order={4}>Team Members</Title>
+              <Text size="sm" c="dimmed">
+                Invite and manage workspace members
+              </Text>
+            </div>
 
-          <Button
-            leftSection={<IconUserPlus size={16} />}
-            onClick={openInvite}
-            w="fit-content"
-          >
-            Invite Member
-          </Button>
+            <Button
+              leftSection={<IconUserPlus size={16} />}
+              onClick={openInvite}
+              w="fit-content"
+            >
+              Invite Member
+            </Button>
 
-          <Divider />
+            <Divider />
 
-          <div>
-            <Title order={5} mb="sm">
-              Pending Invitations
-            </Title>
-            <PendingInvitations workspaceId={workspace.id} />
-          </div>
-        </Stack>
-      </Paper>
+            <div>
+              <Title order={5} mb="sm">
+                Pending Invitations
+              </Title>
+              <PendingInvitations workspaceId={workspace.id} />
+            </div>
+          </Stack>
+        </Paper>
+      </Protect>
 
       {/* Invite Modal */}
       <InviteMemberModal

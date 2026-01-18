@@ -1,4 +1,5 @@
 import { OrganizationSwitcher, UserButton } from "@clerk/clerk-react";
+import { dark } from "@clerk/themes";
 import {
   ActionIcon,
   Group,
@@ -8,6 +9,7 @@ import {
   ThemeIcon,
   Tooltip,
   UnstyledButton,
+  useComputedColorScheme,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -29,6 +31,7 @@ const navItems = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const colorScheme = useComputedColorScheme("light");
 
   const toggle = () => setCollapsed((c) => !c);
 
@@ -144,15 +147,34 @@ export function Sidebar() {
                 <OrganizationSwitcher
                   hidePersonal
                   appearance={{
+                    baseTheme: colorScheme === "dark" ? dark : undefined,
                     elements: {
                       rootBox: "w-full",
                       organizationSwitcherTrigger: "w-full justify-between",
+                      organizationSwitcherTriggerIcon:
+                        colorScheme === "dark" ? "text-white" : "text-gray-900",
+                      userPreviewTextContainer:
+                        colorScheme === "dark" ? "text-white" : "text-gray-900",
+                      organizationPreviewTextContainer:
+                        colorScheme === "dark" ? "text-white" : "text-gray-900",
                     },
                   }}
                 />
               </Group>
               <Group justify="flex-start" gap="sm">
-                <UserButton afterSignOutUrl="/sign-in" showName />
+                <UserButton
+                  afterSignOutUrl="/sign-in"
+                  showName
+                  appearance={{
+                    baseTheme: colorScheme === "dark" ? dark : undefined,
+                    elements: {
+                      userPreviewTextContainer:
+                        colorScheme === "dark" ? "text-white" : "text-gray-900",
+                      userButtonTrigger:
+                        colorScheme === "dark" ? "text-white" : "text-gray-900",
+                    },
+                  }}
+                />
               </Group>
             </>
           )}

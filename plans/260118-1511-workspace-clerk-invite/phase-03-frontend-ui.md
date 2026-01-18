@@ -10,10 +10,18 @@
 ## Overview
 
 **Priority:** P1
-**Status:** pending
-**Effort:** 2.5h
+**Status:** ✅ completed (with issues found in code review)
+**Effort:** 2.5h (actual)
+**Review Report:** [Code Review - Invitation UI Frontend](../reports/code-reviewer-260118-1631-invitation-ui-frontend.md)
 
 Implement invite member modal for workspace settings and accept-invite page that handles Clerk ticket-based authentication.
+
+**Implementation Notes:**
+- Integrated into existing `/settings` page (not new workspace-settings route)
+- Bulk invitation support added (up to 20 emails)
+- Resend functionality implemented
+- TypeScript compiles without errors
+- **⚠️ Security issues found:** Email validation weak, potential XSS in error messages (see review)
 
 ## Key Insights
 
@@ -26,16 +34,18 @@ From research:
 ## Requirements
 
 ### Functional
-- [ ] Invite member modal with email + role inputs
-- [ ] Pending invitations list in workspace settings
-- [ ] Accept invite page with Clerk auth handling
-- [ ] Loading states and error handling
-- [ ] Success redirect to dashboard
+- [x] Invite member modal with email + role inputs (with bulk support)
+- [x] Pending invitations list in workspace settings
+- [x] Accept invite page with Clerk auth handling
+- [x] Loading states and error handling
+- [x] Success redirect to dashboard
+- [x] Resend invitation functionality
+- [x] Revoke invitation functionality
 
 ### Non-functional
-- [ ] Mobile responsive
-- [ ] Accessible (ARIA labels, keyboard navigation)
-- [ ] Mantine component library consistency
+- [x] Mobile responsive
+- [x] Accessible (ARIA labels, keyboard navigation)
+- [x] Mantine component library consistency
 
 ## Architecture
 
@@ -591,28 +601,33 @@ export function useWorkspace() {
 
 ## Todo List
 
-- [ ] Create `use-invitations.ts` hook
-- [ ] Create `invite-member-modal.tsx` component
-- [ ] Create `pending-invitations.tsx` component
-- [ ] Create `workspace-settings.tsx` route
-- [ ] Create `accept-invite.tsx` route
-- [ ] Add `/accept-invite` route to router
-- [ ] Add `/workspace-settings` route to router
-- [ ] Add `use-workspace.ts` hook if missing
-- [ ] Add link to workspace settings in sidebar
-- [ ] Test invitation flow end-to-end
-- [ ] Test signup flow for new users
-- [ ] Test signin flow for existing users
+- [x] Create `use-invitations.ts` hook
+- [x] Create `invite-member-modal.tsx` component
+- [x] Create `pending-invitations.tsx` component
+- [x] ~~Create `workspace-settings.tsx` route~~ (integrated into existing `/settings`)
+- [x] Create `accept-invite.tsx` route
+- [x] Add `/accept-invite` route to router
+- [x] ~~Add `/workspace-settings` route to router~~ (N/A - using `/settings`)
+- [x] Add `use-workspace.ts` hook if missing (used existing `useWorkspaces`)
+- [x] Add link to workspace settings in sidebar
+- [ ] Test invitation flow end-to-end (Phase 4)
+- [ ] Test signup flow for new users (Phase 4)
+- [ ] Test signin flow for existing users (Phase 4)
+- [ ] **Fix email validation** (see code review - HIGH priority)
+- [ ] **Sanitize error messages** (see code review - HIGH priority)
+- [ ] **Add email deduplication** (see code review - MEDIUM priority)
 
 ## Success Criteria
 
-- [ ] Can open invite modal and send invitation
-- [ ] Pending invitations show in list
-- [ ] Can revoke pending invitation
-- [ ] New user can complete signup via invite link
-- [ ] Existing user auto-signs in via invite link
-- [ ] User redirected to dashboard after acceptance
-- [ ] User appears in workspace members list
+- [x] Can open invite modal and send invitation
+- [x] Pending invitations show in list
+- [x] Can revoke pending invitation
+- [x] Can resend pending invitation
+- [x] Bulk invite support (multiple emails)
+- [ ] New user can complete signup via invite link (needs E2E test)
+- [ ] Existing user auto-signs in via invite link (needs E2E test)
+- [ ] User redirected to dashboard after acceptance (needs E2E test)
+- [ ] User appears in workspace members list (needs E2E test)
 
 ## Risk Assessment
 
@@ -627,7 +642,28 @@ export function useWorkspace() {
 - Accept page validates ticket presence
 - No sensitive data in URL (token is one-time use)
 - Form validates password requirements
-- XSS prevented via React escaping
+- ⚠️ **XSS Risk:** Error messages display user input - needs sanitization (see code review)
+- ⚠️ **Email Validation:** Current validation too weak (only checks `@`) - needs regex (see code review)
+- React escaping provides baseline XSS protection but defense-in-depth needed
+
+## Code Review Findings
+
+**Review Date:** 2026-01-18
+**Report:** [Code Review - Invitation UI Frontend](../reports/code-reviewer-260118-1631-invitation-ui-frontend.md)
+**Score:** 7.5/10
+
+**Critical Issues Found (Must Fix):**
+1. Weak email validation - accepts `test@`, `@domain.com`
+2. XSS vulnerability in error message display
+3. Email display without sanitization
+4. Missing duplicate email check in bulk mode
+
+**High Priority Issues:**
+5. Unsafe type assertion in settings.tsx
+6. Race condition in accept-invite useEffect hooks
+7. Missing error recovery in mutations
+
+**Status:** Implementation complete but needs security fixes before production
 
 ## Next Steps
 

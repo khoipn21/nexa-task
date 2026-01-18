@@ -4,11 +4,18 @@ type FetchOptions = RequestInit & {
   params?: Record<string, string>
 }
 
-class ApiClient {
-  private token: string | null = null
+type TokenGetter = () => Promise<string | null>
 
-  setToken(token: string | null) {
-    this.token = token
+class ApiClient {
+  private tokenGetter: TokenGetter | null = null
+
+  setTokenGetter(getter: TokenGetter | null) {
+    this.tokenGetter = getter
+  }
+
+  private async getToken(): Promise<string | null> {
+    if (!this.tokenGetter) return null
+    return this.tokenGetter()
   }
 
   async fetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
@@ -23,8 +30,9 @@ class ApiClient {
     const headers = new Headers(init.headers)
     headers.set('Content-Type', 'application/json')
 
-    if (this.token) {
-      headers.set('Authorization', `Bearer ${this.token}`)
+    const token = await this.getToken()
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`)
     }
 
     const response = await fetch(url, { ...init, headers })
@@ -69,8 +77,9 @@ class ApiClient {
 
     const headers = new Headers()
     // Don't set Content-Type - browser will set it with boundary for multipart
-    if (this.token) {
-      headers.set('Authorization', `Bearer ${this.token}`)
+    const token = await this.getToken()
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`)
     }
 
     const response = await fetch(url, {

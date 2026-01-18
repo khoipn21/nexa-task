@@ -1,38 +1,18 @@
-import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
 import { z } from 'zod'
+import { ForbiddenError, getAuthUser } from '../lib/errors'
+import { success } from '../lib/response'
+import { requireAuth } from '../middleware/auth'
 import {
-  sendInvitation,
   acceptInvitation,
-  getPendingInvitations,
   cancelInvitation,
-} from '../services/invitation' // Assuming invitation service will be created
+  getInvitationByToken,
+  getPendingInvitations,
+} from '../services/invitation'
+import type { Variables } from '../types/context'
 
-const invitationRoutes = new Hono()
-
-// Schema for sending an invitation
-const sendInvitationSchema = z.object({
-  inviteeEmail: z.string().email(),
-  workspaceId: z.string(), // Assuming invitations are tied to a workspace
-})
-
-invitationRoutes.post(
-  '/',
-  zValidator('json', sendInvitationSchema),
-  async (c) => {
-    const { inviteeEmail, workspaceId } = c.req.valid('json')
-    try {
-      const invitation = await sendInvitation(
-        inviteeEmail,
-        workspaceId,
-        c.var.user.id,
-      )
-      return c.json(invitation, 201)
-    } catch (error: any) {
-      return c.json({ error: error.message }, 400)
-    }
-  },
-)
+const invitationRoutes = new Hono<{ Variables: Variables }>()
 
 // Schema for accepting an invitation
 const acceptInvitationSchema = z.object({
@@ -41,15 +21,15 @@ const acceptInvitationSchema = z.object({
 
 invitationRoutes.post(
   '/accept',
+  requireAuth,
   zValidator('json', acceptInvitationSchema),
   async (c) => {
+    const db = c.var.db
+    const user = getAuthUser(c.var)
     const { token } = c.req.valid('json')
-    try {
-      const invitation = await acceptInvitation(token, c.var.user.id)
-      return c.json(invitation, 200)
-    } catch (error: any) {
-      return c.json({ error: error.message }, 400)
-    }
+    // Pass user email for authorization verification
+    const invitation = await acceptInvitation(db, token, user.id, user.email)
+    return success(c, invitation)
   },
 )
 
@@ -60,18 +40,14 @@ const getPendingInvitationsSchema = z.object({
 
 invitationRoutes.get(
   '/pending',
+  requireAuth,
   zValidator('query', getPendingInvitationsSchema),
   async (c) => {
+    const db = c.var.db
+    const user = getAuthUser(c.var)
     const { workspaceId } = c.req.valid('query')
-    try {
-      const invitations = await getPendingInvitations(
-        c.var.user.id,
-        workspaceId,
-      )
-      return c.json({ invitations }, 200)
-    } catch (error: any) {
-      return c.json({ error: error.message }, 400)
-    }
+    const invitations = await getPendingInvitations(db, user.id, workspaceId)
+    return success(c, { invitations })
   },
 )
 
@@ -82,16 +58,41 @@ const cancelInvitationSchema = z.object({
 
 invitationRoutes.delete(
   '/:invitationId',
+  requireAuth,
   zValidator('param', cancelInvitationSchema),
   async (c) => {
+    const db = c.var.db
+    const user = getAuthUser(c.var)
     const { invitationId } = c.req.valid('param')
-    try {
-      const invitation = await cancelInvitation(invitationId, c.var.user.id)
-      return c.json(invitation, 200)
-    } catch (error: any) {
-      return c.json({ error: error.message }, 400)
-    }
+    const invitation = await cancelInvitation(db, invitationId, user.id)
+    return success(c, invitation)
   },
 )
+
+// Get invitation by token (requires auth, user must match invitee email)
+invitationRoutes.get('/token/:token', requireAuth, async (c) => {
+  const db = c.var.db
+  const user = getAuthUser(c.var)
+  const token = c.req.param('token')
+  const invitation = await getInvitationByToken(db, token)
+
+  if (!invitation) {
+    return c.json({ error: 'Invitation not found' }, 404)
+  }
+
+  // Only allow viewing own invitation
+  if (invitation.inviteeEmail !== user.email.toLowerCase()) {
+    throw new ForbiddenError('Cannot view invitations for other users')
+  }
+
+  // Return minimal info (no sensitive data)
+  return success(c, {
+    id: invitation.id,
+    inviteeEmail: invitation.inviteeEmail,
+    role: invitation.role,
+    status: invitation.status,
+    expiresAt: invitation.expiresAt,
+  })
+})
 
 export default invitationRoutes

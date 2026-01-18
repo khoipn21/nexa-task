@@ -1,14 +1,15 @@
+import { relations } from 'drizzle-orm'
 import {
+  index,
+  pgEnum,
   pgTable,
+  timestamp,
+  unique,
   uuid,
   varchar,
-  timestamp,
-  pgEnum,
-  unique,
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
 import { users } from './users'
-import { workspaces } from './workspaces'
+import { workspaceRoleEnum, workspaces } from './workspaces'
 
 export const invitationStatusEnum = pgEnum('invitation_status', [
   'pending',
@@ -29,6 +30,8 @@ export const invitations = pgTable(
       .notNull()
       .unique(),
     status: invitationStatusEnum('status').default('pending').notNull(),
+    role: workspaceRoleEnum('role').notNull().default('member'),
+    clerkInvitationId: varchar('clerk_invitation_id', { length: 255 }),
     sentAt: timestamp('sent_at', { withTimezone: true }).defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     acceptedAt: timestamp('accepted_at', { withTimezone: true }),
@@ -44,6 +47,9 @@ export const invitations = pgTable(
       unqInviteeEmailWorkspace: unique('unq_invitee_email_workspace').on(
         table.inviteeEmail,
         table.workspaceId,
+      ),
+      clerkInvitationIdIdx: index('invitations_clerk_invitation_id_idx').on(
+        table.clerkInvitationId,
       ),
     }
   },
