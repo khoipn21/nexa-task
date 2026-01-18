@@ -6,10 +6,10 @@ import {
   users,
 } from '@repo/db/schema'
 import { and, desc, eq, sql } from 'drizzle-orm'
-import { NotFoundError, ForbiddenError, ValidationError } from '../lib/errors'
+import { ForbiddenError, NotFoundError, ValidationError } from '../lib/errors'
 import { publishNotification } from '../lib/notification-publisher'
-import { addEmailJob, type EmailJobData } from '../lib/queue'
-import { redis, isRedisConnected } from '../lib/redis'
+import { type EmailJobData, addEmailJob } from '../lib/queue'
+import { isRedisConnected, redis } from '../lib/redis'
 
 // Redis cache TTL for view preferences
 // 1 hour balances freshness vs DB load - preferences change infrequently
@@ -219,7 +219,10 @@ export async function markNotificationRead(
     .update(notifications)
     .set({ read: true, readAt: new Date() })
     .where(
-      and(eq(notifications.id, notificationId), eq(notifications.userId, userId)),
+      and(
+        eq(notifications.id, notificationId),
+        eq(notifications.userId, userId),
+      ),
     )
     .returning()
 
@@ -381,7 +384,7 @@ export async function setProjectViewPreference(
     ),
   })
 
-  let result
+  let result: typeof userProjectPreferences.$inferSelect | undefined
   if (existing) {
     const [updated] = await db
       .update(userProjectPreferences)
@@ -395,6 +398,10 @@ export async function setProjectViewPreference(
       .values({ userId, projectId, viewMode })
       .returning()
     result = created
+  }
+
+  if (!result) {
+    throw new Error('Failed to update view preference')
   }
 
   // Update Redis cache

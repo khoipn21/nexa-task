@@ -1,16 +1,16 @@
 import { describe, expect, it, mock } from 'bun:test'
 import type { Database } from '@repo/db'
+import { ForbiddenError, NotFoundError } from '../../src/lib/errors'
 import {
   createNotification,
-  getUserNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
   getNotificationPreferences,
-  updateNotificationPreferences,
   getProjectViewPreference,
+  getUserNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
   setProjectViewPreference,
+  updateNotificationPreferences,
 } from '../../src/services/notification'
-import { NotFoundError, ForbiddenError } from '../../src/lib/errors'
 
 // Mock database responses
 const mockNotification = {

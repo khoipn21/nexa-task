@@ -6,11 +6,19 @@ import {
   moveTaskSchema,
   taskFilterSchema,
   updateTaskSchema,
-  uploadAttachmentSchema,
 } from '@repo/shared'
 import { Hono } from 'hono'
-import { getAuthUser, getWorkspaceId } from '../lib/errors'
+import { ValidationError, getAuthUser, getWorkspaceId } from '../lib/errors'
 import { created, noContent, paginated, success } from '../lib/response'
+import {
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE,
+  generateStorageKey,
+  isValidFileSize,
+  isValidMimeType,
+  uploadFile,
+  validateFileMagicBytes,
+} from '../lib/storage'
 import { requireWorkspace } from '../middleware/auth'
 import { requirePermission } from '../middleware/rbac'
 import * as taskService from '../services/task'
@@ -201,17 +209,65 @@ tasksRouter.get('/:id/attachments', requireWorkspace, async (c) => {
   return success(c, result)
 })
 
+// Multipart file upload with server-side validation
 tasksRouter.post(
   '/:id/attachments',
   requireWorkspace,
   requirePermission('task:update'),
-  zValidator('json', uploadAttachmentSchema),
   async (c) => {
     const user = getAuthUser(c.var)
     const db = c.var.db
     const taskId = c.req.param('id')
-    const data = c.req.valid('json')
-    const result = await taskService.addAttachment(db, taskId, user.id, data)
+
+    // Parse multipart form data
+    const formData = await c.req.formData()
+    const file = formData.get('file')
+
+    if (!file || !(file instanceof File)) {
+      throw new ValidationError({ file: 'File is required' })
+    }
+
+    const fileName = file.name
+    const mimeType = file.type
+    const fileSize = file.size
+
+    // Validate MIME type (server-side)
+    if (!isValidMimeType(mimeType)) {
+      throw new ValidationError({
+        file: `Invalid file type. Allowed: ${[...ALLOWED_MIME_TYPES].join(', ')}`,
+      })
+    }
+
+    // Validate file size
+    if (!isValidFileSize(fileSize)) {
+      throw new ValidationError({
+        file: `File too large. Max size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+      })
+    }
+
+    // Read file buffer for magic bytes validation
+    const buffer = await file.arrayBuffer()
+
+    // Validate magic bytes to prevent MIME type spoofing
+    if (!validateFileMagicBytes(buffer, mimeType)) {
+      throw new ValidationError({
+        file: 'File content does not match declared type',
+      })
+    }
+
+    // Generate storage key and upload to S3
+    const storageKey = generateStorageKey(taskId, fileName)
+    const fileUrl = await uploadFile(storageKey, Buffer.from(buffer), mimeType)
+
+    // Save attachment metadata to database
+    const result = await taskService.addAttachment(db, taskId, user.id, {
+      fileName,
+      fileUrl,
+      fileSize,
+      mimeType,
+      storageKey,
+    })
+
     return created(c, result)
   },
 )

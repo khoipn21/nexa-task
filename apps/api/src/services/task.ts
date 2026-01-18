@@ -17,11 +17,12 @@ import type {
 } from '@repo/shared'
 import { and, asc, desc, eq, gte, like, lte, sql } from 'drizzle-orm'
 import { NotFoundError, ValidationError } from '../lib/errors'
+import { deleteFile } from '../lib/storage'
 import { computeChanges, logActivity } from './activity'
 import {
-  createNotificationWithEmail,
-  type NotificationType,
   type EmailTemplateData,
+  type NotificationType,
+  createNotificationWithEmail,
 } from './notification'
 import { emitTaskEvent } from './realtime'
 
@@ -458,6 +459,42 @@ export async function getTaskDependencies(db: Database, taskId: string) {
   })
 }
 
+// Check for cycles using DFS - returns true if adding edge would create cycle
+async function wouldCreateCycle(
+  db: Database,
+  fromTaskId: string,
+  toTaskId: string,
+): Promise<boolean> {
+  // If we're trying to make A depend on B, check if B already depends on A
+  // (directly or transitively)
+  const visited = new Set<string>()
+  const stack = [toTaskId]
+
+  while (stack.length > 0) {
+    const current = stack.pop()
+    if (!current) continue
+    if (current === fromTaskId) {
+      return true // Found a cycle
+    }
+
+    if (visited.has(current)) continue
+    visited.add(current)
+
+    // Get all tasks that 'current' depends on
+    const deps = await db.query.taskDependencies.findMany({
+      where: eq(taskDependencies.taskId, current),
+    })
+
+    for (const dep of deps) {
+      if (!visited.has(dep.dependsOnId)) {
+        stack.push(dep.dependsOnId)
+      }
+    }
+  }
+
+  return false
+}
+
 export async function addTaskDependency(
   db: Database,
   taskId: string,
@@ -468,15 +505,9 @@ export async function addTaskDependency(
     throw new ValidationError({ dependsOnId: 'Task cannot depend on itself' })
   }
 
-  // Check for circular dependency
-  const existing = await db.query.taskDependencies.findFirst({
-    where: and(
-      eq(taskDependencies.taskId, dependsOnId),
-      eq(taskDependencies.dependsOnId, taskId),
-    ),
-  })
-
-  if (existing) {
+  // Check for circular dependency (including transitive cycles)
+  const wouldCycle = await wouldCreateCycle(db, taskId, dependsOnId)
+  if (wouldCycle) {
     throw new ValidationError({ dependsOnId: 'Circular dependency detected' })
   }
 
@@ -599,6 +630,7 @@ export async function addAttachment(
     fileUrl: string
     fileSize: number
     mimeType: string
+    storageKey?: string
   },
 ) {
   const [attachment] = await db
@@ -606,7 +638,11 @@ export async function addAttachment(
     .values({
       taskId,
       uploadedById,
-      ...data,
+      fileName: data.fileName,
+      fileUrl: data.fileUrl,
+      fileSize: data.fileSize,
+      mimeType: data.mimeType,
+      storageKey: data.storageKey,
     })
     .returning()
 
@@ -614,13 +650,23 @@ export async function addAttachment(
 }
 
 export async function deleteAttachment(db: Database, attachmentId: string) {
-  const result = await db
-    .delete(attachments)
-    .where(eq(attachments.id, attachmentId))
-    .returning()
+  // Get attachment to retrieve storage key
+  const attachment = await db.query.attachments.findFirst({
+    where: eq(attachments.id, attachmentId),
+  })
 
-  if (result.length === 0) {
+  if (!attachment) {
     throw new NotFoundError('Attachment', attachmentId)
+  }
+
+  // Delete from database
+  await db.delete(attachments).where(eq(attachments.id, attachmentId))
+
+  // Delete from S3 if storage key exists (best effort, non-blocking)
+  if (attachment.storageKey) {
+    deleteFile(attachment.storageKey).catch((err) => {
+      console.error('Failed to delete file from S3:', err)
+    })
   }
 }
 

@@ -1,4 +1,4 @@
-import { Queue, Worker, type Job, type Processor } from 'bullmq'
+import { type Job, type Processor, Queue, Worker } from 'bullmq'
 import type { NotificationType } from '../services/notification'
 
 // Queue names as constants for type safety
@@ -8,10 +8,10 @@ export const QUEUE_NAMES = {
 
 // Job priority levels (lower number = higher priority)
 export const JOB_PRIORITY = {
-  critical: 1,    // Password reset, security alerts
-  high: 2,        // Mentions, direct assignments
-  normal: 3,      // Status changes, comments
-  low: 4,         // Bulk notifications, digests
+  critical: 1, // Password reset, security alerts
+  high: 2, // Mentions, direct assignments
+  normal: 3, // Status changes, comments
+  low: 4, // Bulk notifications, digests
 } as const
 
 // Email job data structure
@@ -92,7 +92,8 @@ export async function addEmailJob(
   const queue = getEmailQueue()
 
   // Determine priority based on notification type
-  let priority: (typeof JOB_PRIORITY)[keyof typeof JOB_PRIORITY] = JOB_PRIORITY.normal
+  let priority: (typeof JOB_PRIORITY)[keyof typeof JOB_PRIORITY] =
+    JOB_PRIORITY.normal
   if (options?.priority) {
     priority = JOB_PRIORITY[options.priority]
   } else if (data.type === 'task_mentioned') {

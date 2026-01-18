@@ -114,9 +114,14 @@ export function useRealtimeNotifications() {
           console.log('[WS] Disconnected:', event.code, event.reason)
 
           // Attempt reconnect with exponential backoff
-          if (!isCleaningUp.current && reconnectAttempts.current < maxReconnectAttempts) {
+          if (
+            !isCleaningUp.current &&
+            reconnectAttempts.current < maxReconnectAttempts
+          ) {
             const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 60000)
-            console.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`)
+            console.log(
+              `[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`,
+            )
             reconnectTimeoutRef.current = setTimeout(() => {
               reconnectAttempts.current++
               connect()

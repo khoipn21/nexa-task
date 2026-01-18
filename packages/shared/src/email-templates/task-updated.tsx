@@ -31,12 +31,15 @@ export function TaskUpdatedEmail({
   }
 
   return (
-    <BaseLayout preview={`Task updated: ${taskTitle}`} unsubscribeUrl={unsubscribeUrl}>
+    <BaseLayout
+      preview={`Task updated: ${taskTitle}`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
       <Section style={content}>
         <Heading style={heading}>Task Updated</Heading>
         <Text style={paragraph}>
-          <strong>{updaterName}</strong> updated <strong>"{taskTitle}"</strong> in
-          project <strong>{projectName}</strong>.
+          <strong>{updaterName}</strong> updated <strong>"{taskTitle}"</strong>{' '}
+          in project <strong>{projectName}</strong>.
         </Text>
         <Section style={changeBox}>
           <Text style={changeLabel}>{changeLabels[changeType]} changed:</Text>

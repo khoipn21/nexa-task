@@ -1,8 +1,12 @@
-import type { Job } from 'bullmq'
 import { render } from '@react-email/components'
-import { TaskAssignedEmail, TaskUpdatedEmail, CommentAddedEmail } from '@repo/shared'
-import { sendEmail, sanitizeForEmail } from '../lib/email'
-import { createEmailWorker, type EmailJobData } from '../lib/queue'
+import {
+  CommentAddedEmail,
+  TaskAssignedEmail,
+  TaskUpdatedEmail,
+} from '@repo/shared'
+import type { Job } from 'bullmq'
+import { sanitizeForEmail, sendEmail } from '../lib/email'
+import { type EmailJobData, createEmailWorker } from '../lib/queue'
 
 // Sanitize all template data to prevent XSS
 function sanitizeTemplateData(data: EmailJobData['templateData']) {
@@ -17,7 +21,9 @@ function sanitizeTemplateData(data: EmailJobData['templateData']) {
     newValue: sanitizeForEmail(data.newValue),
     commentPreview: sanitizeForEmail(data.commentPreview),
     isMention: data.isMention,
-    unsubscribeUrl: data.unsubscribeUrl || `${process.env.FRONTEND_URL || ''}/settings/notifications`,
+    unsubscribeUrl:
+      data.unsubscribeUrl ||
+      `${process.env.FRONTEND_URL || ''}/settings/notifications`,
   }
 }
 

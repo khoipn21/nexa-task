@@ -1,16 +1,19 @@
-import { useReorderStatuses, useWorkflowStatuses } from '@/hooks/use-workflow-statuses'
 import {
-  closestCenter,
+  useReorderStatuses,
+  useWorkflowStatuses,
+} from '@/hooks/use-workflow-statuses'
+import {
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
@@ -44,9 +47,7 @@ export function WorkflowSettingsModal({ projectId, opened, onClose }: Props) {
 
   // Use local order if set, otherwise sort by order field
   const sortedStatuses = localOrder
-    ? localOrder
-        .map((id) => statuses.find((s) => s.id === id))
-        .filter(Boolean)
+    ? localOrder.map((id) => statuses.find((s) => s.id === id)).filter(Boolean)
     : [...statuses].sort((a, b) => a.order - b.order)
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -58,11 +59,10 @@ export function WorkflowSettingsModal({ projectId, opened, onClose }: Props) {
 
     if (oldIndex === -1 || newIndex === -1) return
 
-    const newOrder = arrayMove(
-      sortedStatuses.map((s) => s!.id),
-      oldIndex,
-      newIndex,
-    )
+    const currentIds = sortedStatuses
+      .map((s) => s?.id)
+      .filter((id): id is string => id != null)
+    const newOrder = arrayMove(currentIds, oldIndex, newIndex)
 
     // Optimistic local update
     setLocalOrder(newOrder)
@@ -89,7 +89,8 @@ export function WorkflowSettingsModal({ projectId, opened, onClose }: Props) {
     >
       <Stack gap="md">
         <Text size="sm" c="dimmed">
-          Manage workflow statuses for this project. Drag to reorder, click to edit.
+          Manage workflow statuses for this project. Drag to reorder, click to
+          edit.
         </Text>
 
         {isLoading ? (
@@ -109,17 +110,24 @@ export function WorkflowSettingsModal({ projectId, opened, onClose }: Props) {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={sortedStatuses.map((s) => s!.id)}
+              items={sortedStatuses
+                .map((s) => s?.id)
+                .filter((id): id is string => id != null)}
               strategy={verticalListSortingStrategy}
             >
               <Stack gap="xs">
-                {sortedStatuses.map((status) => (
-                  <SortableStatusItem
-                    key={status!.id}
-                    status={status!}
-                    projectId={projectId}
-                  />
-                ))}
+                {sortedStatuses
+                  .filter(
+                    (status): status is NonNullable<typeof status> =>
+                      status != null,
+                  )
+                  .map((status) => (
+                    <SortableStatusItem
+                      key={status.id}
+                      status={status}
+                      projectId={projectId}
+                    />
+                  ))}
               </Stack>
             </SortableContext>
           </DndContext>

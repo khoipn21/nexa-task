@@ -29,7 +29,9 @@ function getEmailConfig(): EmailConfig {
   const from = process.env.SMTP_FROM
 
   if (!user || !pass) {
-    throw new Error('SMTP_USER and SMTP_PASS environment variables are required')
+    throw new Error(
+      'SMTP_USER and SMTP_PASS environment variables are required',
+    )
   }
 
   if (!from) {
@@ -127,7 +129,11 @@ function recordFailure(): void {
 
   if (failureCount >= FAILURE_THRESHOLD) {
     circuitOpen = true
-    console.error('[Email] Circuit breaker opened after', failureCount, 'failures')
+    console.error(
+      '[Email] Circuit breaker opened after',
+      failureCount,
+      'failures',
+    )
   }
 }
 
@@ -137,7 +143,9 @@ function recordSuccess(): void {
 }
 
 // Send email with error handling, validation, and circuit breaker
-export async function sendEmail(options: SendEmailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
+export async function sendEmail(
+  options: SendEmailOptions,
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
   // Check circuit breaker
   if (checkCircuitBreaker()) {
     return {
@@ -177,7 +185,8 @@ export async function sendEmail(options: SendEmailOptions): Promise<{ success: b
       messageId: info.messageId,
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
     console.error('[Email] Send failed:', errorMessage)
 
     recordFailure()
@@ -214,7 +223,10 @@ export function closeEmailTransporter(): void {
 }
 
 // Get circuit breaker status (for health checks)
-export function getCircuitBreakerStatus(): { isOpen: boolean; failureCount: number } {
+export function getCircuitBreakerStatus(): {
+  isOpen: boolean
+  failureCount: number
+} {
   return {
     isOpen: circuitOpen,
     failureCount,

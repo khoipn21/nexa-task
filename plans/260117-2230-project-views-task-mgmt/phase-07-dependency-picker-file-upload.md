@@ -1,6 +1,6 @@
 # Phase 7: Dependency Picker + File Upload
 
-**Priority:** Medium | **Status:** ⬜ Pending | **Depends on:** Phase 1 | **Parallel with:** Phases 4,5,6
+**Priority:** Medium | **Status:** ✅ Done (2026-01-18) | **Depends on:** Phase 1 | **Parallel with:** Phases 4,5,6
 
 ## Context Links
 
@@ -88,24 +88,33 @@ Task Detail
 
 ## Todo List
 
-- [ ] Create TaskPickerModal component
-- [ ] Add search/filter for tasks
-- [ ] Wire up add dependency API
-- [ ] Update task-dependencies with add button
-- [ ] Create FileDropzone component
-- [ ] Wire up file upload API
-- [ ] Add progress indicator
-- [ ] Update task-attachments with dropzone
+- [x] Create TaskPickerModal component
+- [x] Add search/filter for tasks
+- [x] Wire up add dependency API
+- [x] Update task-dependencies with add button
+- [x] Create FileDropzone component
+- [x] Wire up file upload API (multipart with S3)
+- [x] Add progress indicator with status colors
+- [x] Update task-attachments with dropzone
+
+## Security Fixes Applied
+
+- [x] **Critical #1**: Replace blob URLs with real S3 file upload
+- [x] **Critical #2**: Server-side MIME validation + magic bytes check
+- [x] **Warning**: Transitive circular dependency detection (DFS algorithm)
+- [x] Upload progress with success/error status
+- [x] Recovery summary for batch upload failures
 
 ## Success Criteria
 
-- [ ] Can search and select blocking task
-- [ ] Circular dependency rejected with error
-- [ ] Dependency appears immediately after add
-- [ ] Can drag files to upload
-- [ ] Progress shown during upload
-- [ ] File appears in list after upload
-- [ ] Large files (>10MB) rejected with error
+- [x] Can search and select blocking task
+- [x] Circular dependency rejected with error (including transitive cycles)
+- [x] Dependency appears immediately after add
+- [x] Can drag files to upload
+- [x] Progress shown during upload
+- [x] File appears in list after upload
+- [x] Large files (>10MB) rejected with error
+- [x] Invalid MIME types rejected by server
 
 ## Risk Assessment
 

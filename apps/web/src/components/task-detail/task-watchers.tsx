@@ -4,6 +4,7 @@ import {
   useTaskWatchers,
   useToggleWatch,
 } from '@/hooks/use-task-watchers'
+import type { WorkspaceMember } from '@/hooks/use-workspace'
 import {
   ActionIcon,
   Avatar,
@@ -17,17 +18,10 @@ import {
 import { useDisclosure } from '@mantine/hooks'
 import { IconBell, IconBellOff, IconPlus, IconX } from '@tabler/icons-react'
 
-type Member = {
-  id: string
-  name: string
-  email?: string
-  avatarUrl?: string
-}
-
 type Props = {
   taskId: string
   currentUserId: string
-  members: Member[]
+  members: WorkspaceMember[]
   canManageWatchers?: boolean
 }
 
@@ -39,7 +33,10 @@ export function TaskWatchers({
 }: Props) {
   const [opened, { open, close }] = useDisclosure(false)
   const { data: watchers = [], isLoading } = useTaskWatchers(taskId)
-  const { isWatching, toggle, isPending } = useToggleWatch(taskId, currentUserId)
+  const { isWatching, toggle, isPending } = useToggleWatch(
+    taskId,
+    currentUserId,
+  )
   const addWatcher = useAddWatcher(taskId)
   const removeWatcher = useRemoveWatcher(taskId)
 
@@ -79,13 +76,31 @@ export function TaskWatchers({
         </Tooltip>
 
         {/* Avatar stack with popover */}
-        <Popover opened={opened} onClose={close} position="bottom-start" width={280}>
+        <Popover
+          opened={opened}
+          onClose={close}
+          position="bottom-start"
+          width={280}
+        >
           <Popover.Target>
-            <div onClick={open} style={{ cursor: 'pointer' }}>
+            <button
+              type="button"
+              onClick={open}
+              style={{
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+              }}
+            >
               {isLoading ? (
-                <Text size="xs" c="dimmed">Loading...</Text>
+                <Text size="xs" c="dimmed">
+                  Loading...
+                </Text>
               ) : watchers.length === 0 ? (
-                <Text size="xs" c="dimmed">No watchers</Text>
+                <Text size="xs" c="dimmed">
+                  No watchers
+                </Text>
               ) : (
                 <Avatar.Group spacing="sm">
                   {displayedWatchers.map((w) => (
@@ -107,7 +122,7 @@ export function TaskWatchers({
                   )}
                 </Avatar.Group>
               )}
-            </div>
+            </button>
           </Popover.Target>
 
           <Popover.Dropdown>

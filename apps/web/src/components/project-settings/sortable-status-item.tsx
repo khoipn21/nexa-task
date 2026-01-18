@@ -1,4 +1,8 @@
-import { type WorkflowStatus, useDeleteStatus, useUpdateStatus } from '@/hooks/use-workflow-statuses'
+import {
+  type WorkflowStatus,
+  useDeleteStatus,
+  useUpdateStatus,
+} from '@/hooks/use-workflow-statuses'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
@@ -12,7 +16,13 @@ import {
   Tooltip,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconCheck, IconGripVertical, IconPencil, IconTrash, IconX } from '@tabler/icons-react'
+import {
+  IconCheck,
+  IconGripVertical,
+  IconPencil,
+  IconTrash,
+  IconX,
+} from '@tabler/icons-react'
 import { useState } from 'react'
 
 type Props = {
@@ -21,7 +31,11 @@ type Props = {
   taskCount?: number
 }
 
-export function SortableStatusItem({ status, projectId, taskCount = 0 }: Props) {
+export function SortableStatusItem({
+  status,
+  projectId,
+  taskCount = 0,
+}: Props) {
   const [isEditing, { open: startEdit, close: endEdit }] = useDisclosure(false)
   const [editName, setEditName] = useState(status.name)
   const [editColor, setEditColor] = useState(status.color)
@@ -29,8 +43,14 @@ export function SortableStatusItem({ status, projectId, taskCount = 0 }: Props) 
   const updateStatus = useUpdateStatus(projectId)
   const deleteStatus = useDeleteStatus(projectId)
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: status.id })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: status.id })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -41,7 +61,10 @@ export function SortableStatusItem({ status, projectId, taskCount = 0 }: Props) 
   const handleSave = () => {
     if (!editName.trim()) return
     updateStatus.mutate(
-      { statusId: status.id, data: { name: editName.trim(), color: editColor } },
+      {
+        statusId: status.id,
+        data: { name: editName.trim(), color: editColor },
+      },
       { onSuccess: endEdit },
     )
   }
@@ -53,11 +76,17 @@ export function SortableStatusItem({ status, projectId, taskCount = 0 }: Props) 
   }
 
   const handleToggleDefault = () => {
-    updateStatus.mutate({ statusId: status.id, data: { isDefault: !status.isDefault } })
+    updateStatus.mutate({
+      statusId: status.id,
+      data: { isDefault: !status.isDefault },
+    })
   }
 
   const handleToggleFinal = () => {
-    updateStatus.mutate({ statusId: status.id, data: { isFinal: !status.isFinal } })
+    updateStatus.mutate({
+      statusId: status.id,
+      data: { isFinal: !status.isFinal },
+    })
   }
 
   const handleDelete = () => {
@@ -118,7 +147,12 @@ export function SortableStatusItem({ status, projectId, taskCount = 0 }: Props) 
           >
             <IconCheck size={16} />
           </ActionIcon>
-          <ActionIcon variant="subtle" color="gray" size="sm" onClick={handleCancel}>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={handleCancel}
+          >
             <IconX size={16} />
           </ActionIcon>
         </>
@@ -160,7 +194,12 @@ export function SortableStatusItem({ status, projectId, taskCount = 0 }: Props) 
             />
           </Tooltip>
 
-          <ActionIcon variant="subtle" color="gray" size="sm" onClick={startEdit}>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={startEdit}
+          >
             <IconPencil size={16} />
           </ActionIcon>
 

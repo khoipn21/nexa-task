@@ -38,7 +38,9 @@ export function useCreateStatus(projectId: string) {
     mutationFn: (data: CreateStatusInput) =>
       api.post<WorkflowStatus>(`/projects/${projectId}/statuses`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-statuses', projectId] })
+      queryClient.invalidateQueries({
+        queryKey: ['workflow-statuses', projectId],
+      })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
     },
   })
@@ -49,10 +51,18 @@ export function useUpdateStatus(projectId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ statusId, data }: { statusId: string; data: UpdateStatusInput }) =>
-      api.patch<WorkflowStatus>(`/projects/${projectId}/statuses/${statusId}`, data),
+    mutationFn: ({
+      statusId,
+      data,
+    }: { statusId: string; data: UpdateStatusInput }) =>
+      api.patch<WorkflowStatus>(
+        `/projects/${projectId}/statuses/${statusId}`,
+        data,
+      ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-statuses', projectId] })
+      queryClient.invalidateQueries({
+        queryKey: ['workflow-statuses', projectId],
+      })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
     },
   })
@@ -66,7 +76,9 @@ export function useDeleteStatus(projectId: string) {
     mutationFn: (statusId: string) =>
       api.delete(`/projects/${projectId}/statuses/${statusId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-statuses', projectId] })
+      queryClient.invalidateQueries({
+        queryKey: ['workflow-statuses', projectId],
+      })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
     },
   })
@@ -78,10 +90,14 @@ export function useReorderStatuses(projectId: string) {
 
   return useMutation({
     mutationFn: (orderedIds: string[]) =>
-      api.post<WorkflowStatus[]>(`/projects/${projectId}/statuses/reorder`, { orderedIds }),
+      api.post<WorkflowStatus[]>(`/projects/${projectId}/statuses/reorder`, {
+        orderedIds,
+      }),
     onMutate: async (orderedIds) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['workflow-statuses', projectId] })
+      await queryClient.cancelQueries({
+        queryKey: ['workflow-statuses', projectId],
+      })
 
       // Snapshot previous value
       const previousStatuses = queryClient.getQueryData<WorkflowStatus[]>([
@@ -113,7 +129,9 @@ export function useReorderStatuses(projectId: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-statuses', projectId] })
+      queryClient.invalidateQueries({
+        queryKey: ['workflow-statuses', projectId],
+      })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
     },
   })

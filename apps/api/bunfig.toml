@@ -1,0 +1,3 @@
+[test]
+# Run test files with reduced parallelism to avoid pool conflicts
+smol = true

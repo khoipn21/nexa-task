@@ -34,7 +34,8 @@ export function CommentAddedEmail({
         <Text style={paragraph}>
           <strong>{commenterName}</strong>{' '}
           {isMention ? 'mentioned you in' : 'commented on'}{' '}
-          <strong>"{taskTitle}"</strong> in project <strong>{projectName}</strong>.
+          <strong>"{taskTitle}"</strong> in project{' '}
+          <strong>{projectName}</strong>.
         </Text>
         <Section style={commentBox}>
           <Text style={commentText}>"{commentPreview}"</Text>

@@ -1,5 +1,6 @@
 import type { TaskPriority } from '@/hooks/use-tasks'
 import { useUpdateTask } from '@/hooks/use-tasks'
+import type { WorkspaceMember } from '@/hooks/use-workspace'
 import { Select, Stack, Text } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { TaskWatchers } from './task-watchers'
@@ -18,16 +19,10 @@ type Status = {
   color: string
 }
 
-type Member = {
-  id: string
-  name: string
-  avatarUrl?: string
-}
-
 type Props = {
   task: TaskData
   statuses: Status[]
-  members: Member[]
+  members: WorkspaceMember[]
   currentUserId?: string
   canManageWatchers?: boolean
 }

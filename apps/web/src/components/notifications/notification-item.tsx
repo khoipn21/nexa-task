@@ -1,13 +1,16 @@
-import { useMarkNotificationRead, type Notification } from '@/hooks/use-notifications'
+import {
+  type Notification,
+  useMarkNotificationRead,
+} from '@/hooks/use-notifications'
 import { Box, Group, Text, UnstyledButton } from '@mantine/core'
 import {
+  IconAlertCircle,
   IconCheck,
+  IconClock,
+  IconEye,
+  IconLink,
   IconMessage,
   IconUser,
-  IconAlertCircle,
-  IconClock,
-  IconLink,
-  IconEye,
 } from '@tabler/icons-react'
 import { useNavigate } from 'react-router'
 
@@ -59,25 +62,32 @@ function getNavigationPath(notification: Notification): string | null {
   if (!notification.entityType || !notification.entityId) return null
 
   switch (notification.entityType) {
-    case 'task':
+    case 'task': {
       // Navigate to project with task selected
       const projectId = (notification.data?.projectId as string) || ''
-      return projectId ? `/projects/${projectId}?task=${notification.entityId}` : null
+      return projectId
+        ? `/projects/${projectId}?task=${notification.entityId}`
+        : null
+    }
     case 'project':
       return `/projects/${notification.entityId}`
-    case 'comment':
+    case 'comment': {
       // Navigate to task that contains the comment
       const taskProjectId = (notification.data?.projectId as string) || ''
       const taskId = (notification.data?.taskId as string) || ''
       return taskProjectId && taskId
         ? `/projects/${taskProjectId}?task=${taskId}`
         : null
+    }
     default:
       return null
   }
 }
 
-export function NotificationItem({ notification, onClick }: NotificationItemProps) {
+export function NotificationItem({
+  notification,
+  onClick,
+}: NotificationItemProps) {
   const navigate = useNavigate()
   const markRead = useMarkNotificationRead()
 

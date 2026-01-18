@@ -20,12 +20,16 @@ export function TaskAssignedEmail({
   unsubscribeUrl,
 }: TaskAssignedEmailProps) {
   return (
-    <BaseLayout preview={`You've been assigned to: ${taskTitle}`} unsubscribeUrl={unsubscribeUrl}>
+    <BaseLayout
+      preview={`You've been assigned to: ${taskTitle}`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
       <Section style={content}>
         <Heading style={heading}>You've been assigned a new task</Heading>
         <Text style={paragraph}>
           <strong>{assignerName}</strong> assigned you to{' '}
-          <strong>"{taskTitle}"</strong> in project <strong>{projectName}</strong>.
+          <strong>"{taskTitle}"</strong> in project{' '}
+          <strong>{projectName}</strong>.
         </Text>
         {dueDate && (
           <Text style={paragraph}>

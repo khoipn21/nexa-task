@@ -87,7 +87,9 @@ export function useViewPreference(projectId: string | undefined) {
   // Mutation for saving to server (stable reference via ref pattern)
   const saveMutation = useMutation({
     mutationFn: ({ pid, mode }: { pid: string; mode: ViewMode }) =>
-      api.patch(`/user-settings/projects/${pid}/preference`, { viewMode: mode }),
+      api.patch(`/user-settings/projects/${pid}/preference`, {
+        viewMode: mode,
+      }),
     onSuccess: (_, { pid, mode }) => {
       queryClient.setQueryData(['view-preference', pid], { viewMode: mode })
       lastSavedRef.current = mode
@@ -120,29 +122,26 @@ export function useViewPreference(projectId: string | undefined) {
   }, [])
 
   // Set view mode with debounced server sync (stable callback)
-  const setViewMode = useCallback(
-    (mode: ViewMode) => {
-      const pid = projectIdRef.current
-      if (!pid) return
+  const setViewMode = useCallback((mode: ViewMode) => {
+    const pid = projectIdRef.current
+    if (!pid) return
 
-      // Immediate localStorage update
-      setLocalMode(mode)
-      setLocalPreference(pid, mode)
-      pendingModeRef.current = mode
+    // Immediate localStorage update
+    setLocalMode(mode)
+    setLocalPreference(pid, mode)
+    pendingModeRef.current = mode
 
-      // Debounced server save (500ms)
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
+    // Debounced server save (500ms)
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    debounceRef.current = setTimeout(() => {
+      if (mode !== lastSavedRef.current && projectIdRef.current === pid) {
+        saveMutationRef.current.mutate({ pid, mode })
       }
-      debounceRef.current = setTimeout(() => {
-        if (mode !== lastSavedRef.current && projectIdRef.current === pid) {
-          saveMutationRef.current.mutate({ pid, mode })
-        }
-        pendingModeRef.current = null
-      }, 500)
-    },
-    [],
-  )
+      pendingModeRef.current = null
+    }, 500)
+  }, [])
 
   // Cleanup debounce and flush pending on unmount
   useEffect(() => {

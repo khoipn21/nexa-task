@@ -1,6 +1,6 @@
 import {
-  useNotificationsWithRealtime,
   useMarkAllNotificationsRead,
+  useNotificationsWithRealtime,
 } from '@/hooks/use-notifications'
 import {
   ActionIcon,

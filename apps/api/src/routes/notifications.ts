@@ -39,7 +39,10 @@ notificationsRouter.get(
 notificationsRouter.get('/unread-count', requireWorkspace, async (c) => {
   const user = getAuthUser(c.var)
   const db = c.var.db
-  const unread = await notificationService.getUnreadNotificationCount(db, user.id)
+  const unread = await notificationService.getUnreadNotificationCount(
+    db,
+    user.id,
+  )
   return success(c, { unread })
 })
 
@@ -68,7 +71,10 @@ notificationsRouter.post('/mark-all-read', requireWorkspace, async (c) => {
 notificationsRouter.get('/preferences', requireWorkspace, async (c) => {
   const user = getAuthUser(c.var)
   const db = c.var.db
-  const result = await notificationService.getNotificationPreferences(db, user.id)
+  const result = await notificationService.getNotificationPreferences(
+    db,
+    user.id,
+  )
   return success(c, result)
 })
 

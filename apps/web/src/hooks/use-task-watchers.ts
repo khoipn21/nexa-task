@@ -1,6 +1,6 @@
 import { api } from '@/lib/api'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export type Watcher = {
   id: string
@@ -33,19 +33,25 @@ export function useAddWatcher(taskId: string) {
       api.post<Watcher>(`/tasks/${taskId}/watchers`, { userId }),
     onMutate: async (userId) => {
       await queryClient.cancelQueries({ queryKey: ['task-watchers', taskId] })
-      const previous = queryClient.getQueryData<Watcher[]>(['task-watchers', taskId])
+      const previous = queryClient.getQueryData<Watcher[]>([
+        'task-watchers',
+        taskId,
+      ])
 
       // Optimistically add placeholder watcher
-      queryClient.setQueryData<Watcher[]>(['task-watchers', taskId], (old = []) => [
-        ...old,
-        {
-          id: `temp-${userId}`,
-          userId,
-          taskId,
-          user: { id: userId, name: 'Adding...', email: '' },
-          createdAt: new Date().toISOString(),
-        },
-      ])
+      queryClient.setQueryData<Watcher[]>(
+        ['task-watchers', taskId],
+        (old = []) => [
+          ...old,
+          {
+            id: `temp-${userId}`,
+            userId,
+            taskId,
+            user: { id: userId, name: 'Adding...', email: '' },
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      )
 
       return { previous }
     },
@@ -74,11 +80,15 @@ export function useRemoveWatcher(taskId: string) {
       api.delete(`/tasks/${taskId}/watchers/${userId}`),
     onMutate: async (userId) => {
       await queryClient.cancelQueries({ queryKey: ['task-watchers', taskId] })
-      const previous = queryClient.getQueryData<Watcher[]>(['task-watchers', taskId])
+      const previous = queryClient.getQueryData<Watcher[]>([
+        'task-watchers',
+        taskId,
+      ])
 
       // Optimistically remove watcher
-      queryClient.setQueryData<Watcher[]>(['task-watchers', taskId], (old = []) =>
-        old.filter((w) => w.userId !== userId),
+      queryClient.setQueryData<Watcher[]>(
+        ['task-watchers', taskId],
+        (old = []) => old.filter((w) => w.userId !== userId),
       )
 
       return { previous }
@@ -111,21 +121,28 @@ export function useToggleWatch(taskId: string, currentUserId: string) {
   const { data: watchers = [] } = useTaskWatchers(taskId)
 
   const addWatcher = useMutation({
-    mutationFn: () => api.post(`/tasks/${taskId}/watchers`, { userId: currentUserId }),
+    mutationFn: () =>
+      api.post(`/tasks/${taskId}/watchers`, { userId: currentUserId }),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ['task-watchers', taskId] })
-      const previous = queryClient.getQueryData<Watcher[]>(['task-watchers', taskId])
-
-      queryClient.setQueryData<Watcher[]>(['task-watchers', taskId], (old = []) => [
-        ...old,
-        {
-          id: `temp-${currentUserId}`,
-          userId: currentUserId,
-          taskId,
-          user: { id: currentUserId, name: 'You', email: '' },
-          createdAt: new Date().toISOString(),
-        },
+      const previous = queryClient.getQueryData<Watcher[]>([
+        'task-watchers',
+        taskId,
       ])
+
+      queryClient.setQueryData<Watcher[]>(
+        ['task-watchers', taskId],
+        (old = []) => [
+          ...old,
+          {
+            id: `temp-${currentUserId}`,
+            userId: currentUserId,
+            taskId,
+            user: { id: currentUserId, name: 'You', email: '' },
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      )
 
       return { previous }
     },
@@ -148,10 +165,14 @@ export function useToggleWatch(taskId: string, currentUserId: string) {
     mutationFn: () => api.delete(`/tasks/${taskId}/watchers/${currentUserId}`),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ['task-watchers', taskId] })
-      const previous = queryClient.getQueryData<Watcher[]>(['task-watchers', taskId])
+      const previous = queryClient.getQueryData<Watcher[]>([
+        'task-watchers',
+        taskId,
+      ])
 
-      queryClient.setQueryData<Watcher[]>(['task-watchers', taskId], (old = []) =>
-        old.filter((w) => w.userId !== currentUserId),
+      queryClient.setQueryData<Watcher[]>(
+        ['task-watchers', taskId],
+        (old = []) => old.filter((w) => w.userId !== currentUserId),
       )
 
       return { previous }

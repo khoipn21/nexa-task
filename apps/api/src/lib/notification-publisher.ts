@@ -1,11 +1,14 @@
-import { redis, redisSub, isRedisConnected } from './redis'
+import { isRedisConnected, redis, redisSub } from './redis'
 import { wsManager } from './websocket'
 
 // Notification channel pattern: notifications:{userId}
 const getNotificationChannel = (userId: string) => `notifications:${userId}`
 
 // Track active subscriptions for cleanup
-const activeSubscriptions = new Map<string, (channel: string, message: string) => void>()
+const activeSubscriptions = new Map<
+  string,
+  (channel: string, message: string) => void
+>()
 
 export interface NotificationPayload {
   id: string
@@ -36,9 +39,15 @@ export async function publishNotification(
   // Try Redis pub/sub first (for multi-server deployment)
   if (isRedisConnected()) {
     try {
-      await redis.publish(getNotificationChannel(userId), JSON.stringify(payload))
+      await redis.publish(
+        getNotificationChannel(userId),
+        JSON.stringify(payload),
+      )
     } catch (error) {
-      console.warn('Redis publish failed, falling back to direct WebSocket:', error)
+      console.warn(
+        'Redis publish failed, falling back to direct WebSocket:',
+        error,
+      )
       // Fallback to direct WebSocket
       sendToUserWebSocket(userId, payload)
     }

@@ -1,13 +1,25 @@
+import { WorkflowSettingsModal } from '@/components/project-settings/workflow-settings-modal'
 import { CalendarView } from '@/components/project-views/calendar/calendar-view'
 import { KanbanBoard } from '@/components/project-views/kanban/kanban-board'
 import { TaskTable } from '@/components/project-views/list/task-table'
 import { ViewSwitcher } from '@/components/project-views/view-switcher'
-import { WorkflowSettingsModal } from '@/components/project-settings/workflow-settings-modal'
+import { TaskDetailPanel } from '@/components/task-detail/task-detail-panel'
 import { useProject } from '@/hooks/use-projects'
 import { useViewPreference } from '@/hooks/use-view-preference'
-import { ActionIcon, Container, Group, Skeleton, Stack, Text, Title, Tooltip } from '@mantine/core'
+import { useWorkspaceMembers } from '@/hooks/use-workspace'
+import {
+  ActionIcon,
+  Container,
+  Group,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+  Tooltip,
+} from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconSettings } from '@tabler/icons-react'
+import { useState } from 'react'
 import { useParams } from 'react-router'
 
 // Default workflow statuses if project doesn't have them yet
@@ -23,7 +35,18 @@ export default function ProjectDetail() {
   const { id } = useParams()
   const { data: project, isLoading } = useProject(id)
   const { viewMode } = useViewPreference(id)
-  const [settingsOpened, { open: openSettings, close: closeSettings }] = useDisclosure(false)
+  const { data: members = [] } = useWorkspaceMembers(project?.workspaceId)
+  const [settingsOpened, { open: openSettings, close: closeSettings }] =
+    useDisclosure(false)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+
+  const handleTaskClick = (taskId: string) => {
+    setSelectedTaskId(taskId)
+  }
+
+  const handleCloseTaskDetail = () => {
+    setSelectedTaskId(null)
+  }
 
   if (isLoading) {
     return (
@@ -71,10 +94,18 @@ export default function ProjectDetail() {
         </Group>
 
         {viewMode === 'kanban' && id && (
-          <KanbanBoard projectId={id} statuses={statuses} />
+          <KanbanBoard
+            projectId={id}
+            statuses={statuses}
+            onTaskClick={handleTaskClick}
+          />
         )}
-        {viewMode === 'list' && id && <TaskTable projectId={id} />}
-        {viewMode === 'calendar' && id && <CalendarView projectId={id} />}
+        {viewMode === 'list' && id && (
+          <TaskTable projectId={id} onTaskClick={handleTaskClick} />
+        )}
+        {viewMode === 'calendar' && id && (
+          <CalendarView projectId={id} onTaskClick={handleTaskClick} />
+        )}
       </Stack>
 
       {id && (
@@ -82,6 +113,16 @@ export default function ProjectDetail() {
           projectId={id}
           opened={settingsOpened}
           onClose={closeSettings}
+        />
+      )}
+
+      {id && (
+        <TaskDetailPanel
+          taskId={selectedTaskId}
+          onClose={handleCloseTaskDetail}
+          statuses={statuses}
+          members={members}
+          projectId={id}
         />
       )}
     </Container>

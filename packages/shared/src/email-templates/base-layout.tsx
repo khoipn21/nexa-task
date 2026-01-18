@@ -17,7 +17,11 @@ interface BaseLayoutProps {
 }
 
 // Base email layout with consistent branding and unsubscribe footer
-export function BaseLayout({ preview, children, unsubscribeUrl }: BaseLayoutProps) {
+export function BaseLayout({
+  preview,
+  children,
+  unsubscribeUrl,
+}: BaseLayoutProps) {
   // Use provided URL or settings page as fallback
   const unsubscribeLink = unsubscribeUrl || '#'
 
@@ -33,7 +37,8 @@ export function BaseLayout({ preview, children, unsubscribeUrl }: BaseLayoutProp
           {children}
           <Section style={footer}>
             <Text style={footerText}>
-              You received this email because you are watching a task on NexaTask.
+              You received this email because you are watching a task on
+              NexaTask.
             </Text>
             <Link href={unsubscribeLink} style={unsubscribeLinkStyle}>
               Unsubscribe from these notifications
