@@ -2,6 +2,7 @@ import { app } from './app'
 import { connectRedis } from './lib/redis'
 import wsRoutes, { websocket } from './routes/ws'
 import { initRealtimeSubscriptions } from './services/realtime'
+import { startEmailWorker } from './workers/email-worker'
 
 const port = process.env.PORT || 3001
 
@@ -12,6 +13,10 @@ app.route('/ws', wsRoutes)
 async function init() {
   await connectRedis()
   initRealtimeSubscriptions()
+
+  // Start email worker in embedded mode
+  startEmailWorker()
+
   console.log(`Starting API server on port ${port}...`)
 }
 

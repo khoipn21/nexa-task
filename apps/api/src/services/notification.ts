@@ -123,15 +123,18 @@ export async function createNotificationWithEmail(
   // Check user preferences for email
   const prefs = await getNotificationPreferences(db, input.userId)
   if (!prefs) {
+    console.log('[Email] Skipped: no preferences for user', input.userId)
     return { notification, emailQueued: false }
   }
 
   // Skip email if disabled or type not enabled
   if (!prefs.emailEnabled) {
+    console.log('[Email] Skipped: email disabled for user', input.userId)
     return { notification, emailQueued: false }
   }
 
   if (!prefs.enabledTypes.includes(input.type)) {
+    console.log('[Email] Skipped: type', input.type, 'not enabled for user', input.userId)
     return { notification, emailQueued: false }
   }
 
@@ -142,6 +145,7 @@ export async function createNotificationWithEmail(
   })
 
   if (!user?.email) {
+    console.log('[Email] Skipped: no email for user', input.userId)
     return { notification, emailQueued: false }
   }
 
@@ -156,6 +160,13 @@ export async function createNotificationWithEmail(
   }
 
   await addEmailJob(jobData)
+
+  console.log('[Email] Job queued:', {
+    notificationId: notification.id,
+    userId: input.userId,
+    type: input.type,
+    recipientEmail: user.email,
+  })
 
   return { notification, emailQueued: true }
 }

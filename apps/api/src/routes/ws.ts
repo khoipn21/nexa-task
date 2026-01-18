@@ -25,6 +25,7 @@ wsRoutes.get(
           }
           wsManager.addConnection(rawWs)
           ws.send(JSON.stringify({ type: 'connected' }))
+          console.log('[WS] Client connected:', rawWs.data.userId)
         }
       },
 
@@ -67,6 +68,7 @@ wsRoutes.get(
       onClose(_event, ws) {
         const rawWs = ws.raw as ServerWebSocket<WSData> | undefined
         if (rawWs) {
+          console.log('[WS] Client disconnected:', rawWs.data.userId)
           wsManager.removeConnection(rawWs)
         }
       },

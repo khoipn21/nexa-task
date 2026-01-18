@@ -317,6 +317,7 @@ export async function updateTask(
 
     // Notify new assignee
     if (data.assigneeId && data.assigneeId !== userId) {
+      console.log('[Task] Assignment detected - notifying:', data.assigneeId)
       // Get assigner name for email
       const assigner = await db.query.users.findFirst({
         where: eq(users.id, userId),
