@@ -86,9 +86,22 @@ export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-6 overflow-x-auto pb-4 h-full snap-x">
+      <div
+        className={`flex h-full ${
+          statuses.length > 5
+            ? "gap-6 overflow-x-auto pb-4 snap-x"
+            : "gap-4 w-full"
+        }`}
+      >
         {statuses.map((status) => (
-          <div key={status.id} className="snap-start h-full">
+          <div
+            key={status.id}
+            className={`h-full ${
+              statuses.length > 5
+                ? "snap-start min-w-[300px] w-[300px]"
+                : "flex-1 min-w-0"
+            }`}
+          >
             <KanbanColumn
               status={status}
               tasks={tasksByStatus[status.id] ?? []}

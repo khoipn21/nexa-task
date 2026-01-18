@@ -29,7 +29,7 @@ export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
   return (
     <Box
       ref={setNodeRef}
-      className={`min-w-[300px] w-[300px] flex flex-col rounded-xl transition-colors duration-200 ${
+      className={`w-full min-w-0 flex flex-col rounded-xl transition-colors duration-200 ${
         isOver
           ? "bg-blue-50/50 dark:bg-blue-900/10 ring-2 ring-blue-200 dark:ring-blue-800"
           : "bg-gray-50/50 dark:bg-dark-8/50 hover:bg-gray-100/50 dark:hover:bg-dark-8"
@@ -46,7 +46,13 @@ export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
           <ThemeIcon size="xs" radius="xl" color={status.color} variant="light">
             <div className="w-1.5 h-1.5 rounded-full bg-current" />
           </ThemeIcon>
-          <Text fw={700} size="sm" c="dimmed" tt="uppercase" style={{ letterSpacing: '0.05em' }}>
+          <Text
+            fw={700}
+            size="sm"
+            c="dimmed"
+            tt="uppercase"
+            style={{ letterSpacing: "0.05em" }}
+          >
             {status.name}
           </Text>
         </Group>
