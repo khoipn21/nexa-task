@@ -1,29 +1,48 @@
-import { TaskDetailContent } from "@/components/task-detail/task-detail-content";
-import { useProject } from "@/hooks/use-projects";
-import { useTask } from "@/hooks/use-tasks";
-import { useWorkspaceMembers } from "@/hooks/use-workspace";
-import { useWorkflowStatuses } from "@/hooks/use-workflow-statuses";
-import { Alert, Breadcrumbs, ScrollArea, Skeleton, Stack, Text } from "@mantine/core";
-import { IconAlertCircle, IconArrowLeft, IconHome } from "@tabler/icons-react";
-import { Link, useParams } from "react-router";
+import { TaskDetailContent } from '@/components/task-detail/task-detail-content'
+import { useProject } from '@/hooks/use-projects'
+import { useTask } from '@/hooks/use-tasks'
+import { useWorkflowStatuses } from '@/hooks/use-workflow-statuses'
+import { useWorkspaceMembers } from '@/hooks/use-workspace'
+import {
+  Alert,
+  Breadcrumbs,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core'
+import { IconAlertCircle, IconArrowLeft, IconHome } from '@tabler/icons-react'
+import { Link, useParams } from 'react-router'
 
 export default function TaskDetail() {
-  const { id: taskId } = useParams<{ id: string }>();
-  const { data: task, isLoading: taskLoading, isError: taskError } = useTask(taskId);
-  const { data: project, isLoading: projectLoading } = useProject(task?.projectId);
-  const { data: statuses = [], isLoading: statusesLoading } = useWorkflowStatuses(task?.projectId);
-  const { data: members = [] } = useWorkspaceMembers(project?.workspaceId);
+  const { id: taskId } = useParams<{ id: string }>()
+  const {
+    data: task,
+    isLoading: taskLoading,
+    isError: taskError,
+  } = useTask(taskId)
+  const { data: project, isLoading: projectLoading } = useProject(
+    task?.projectId,
+  )
+  const { data: statuses = [], isLoading: statusesLoading } =
+    useWorkflowStatuses(task?.projectId)
+  const { data: members = [] } = useWorkspaceMembers(project?.workspaceId)
 
-  const isLoading = taskLoading || projectLoading || statusesLoading;
+  const isLoading = taskLoading || projectLoading || statusesLoading
 
   if (taskError) {
     return (
       <div className="p-6">
-        <Alert icon={<IconAlertCircle size={16} />} title="Task Not Found" color="red">
-          The task you're looking for doesn't exist or you don't have access to it.
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          title="Task Not Found"
+          color="red"
+        >
+          The task you're looking for doesn't exist or you don't have access to
+          it.
         </Alert>
       </div>
-    );
+    )
   }
 
   return (
@@ -36,7 +55,7 @@ export default function TaskDetail() {
           <Breadcrumbs
             separator="/"
             classNames={{
-              separator: "text-gray-400 dark:text-gray-500 mx-2",
+              separator: 'text-gray-400 dark:text-gray-500 mx-2',
             }}
           >
             <Link
@@ -55,13 +74,13 @@ export default function TaskDetail() {
               </Link>
             )}
             <Text size="sm" c="dimmed" truncate className="max-w-[200px]">
-              {task?.title ?? "Task"}
+              {task?.title ?? 'Task'}
             </Text>
           </Breadcrumbs>
         )}
 
         <Link
-          to={task?.projectId ? `/projects/${task.projectId}` : "/dashboard"}
+          to={task?.projectId ? `/projects/${task.projectId}` : '/dashboard'}
           className="ml-auto flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           <IconArrowLeft size={14} />
@@ -89,5 +108,5 @@ export default function TaskDetail() {
         </div>
       </ScrollArea>
     </div>
-  );
+  )
 }

@@ -1,28 +1,34 @@
-import { useTask } from "@/hooks/use-tasks";
-import type { WorkspaceMember } from "@/hooks/use-workspace";
-import { Box, Drawer, Group, ScrollArea, Text, ThemeIcon } from "@mantine/core";
-import { IconCheck, IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
-import { TaskDetailContent } from "./task-detail-content";
+import { useTask } from '@/hooks/use-tasks'
+import type { WorkspaceMember } from '@/hooks/use-workspace'
+import { Box, Drawer, Group, ScrollArea, Text, ThemeIcon } from '@mantine/core'
+import { IconCheck, IconLayoutSidebarRightCollapse } from '@tabler/icons-react'
+import { TaskDetailContent } from './task-detail-content'
 
 type Status = {
-  id: string;
-  name: string;
-  color: string;
-};
+  id: string
+  name: string
+  color: string
+}
 
 type Props = {
-  taskId: string | null;
-  onClose: () => void;
-  statuses: Status[];
-  members: WorkspaceMember[];
-  projectId: string;
-};
+  taskId: string | null
+  onClose: () => void
+  statuses: Status[]
+  members: WorkspaceMember[]
+  projectId: string
+}
 
 /**
  * Task detail drawer panel - used in project pages for quick task editing
  */
-export function TaskDetailPanel({ taskId, onClose, statuses, members, projectId }: Props) {
-  const { data: task } = useTask(taskId || undefined);
+export function TaskDetailPanel({
+  taskId,
+  onClose,
+  statuses,
+  members,
+  projectId,
+}: Props) {
+  const { data: task } = useTask(taskId || undefined)
 
   return (
     <Drawer
@@ -33,8 +39,8 @@ export function TaskDetailPanel({ taskId, onClose, statuses, members, projectId 
       padding={0}
       withCloseButton={false}
       classNames={{
-        body: "h-full flex flex-col",
-        content: "rounded-l-2xl overflow-hidden",
+        body: 'h-full flex flex-col',
+        content: 'rounded-l-2xl overflow-hidden',
       }}
       overlayProps={{ opacity: 0.3, blur: 2 }}
     >
@@ -45,7 +51,9 @@ export function TaskDetailPanel({ taskId, onClose, statuses, members, projectId 
             <IconCheck size={14} />
           </ThemeIcon>
           <Text size="sm" fw={500} c="dimmed">
-            {task?.statusId ? statuses.find((s) => s.id === task.statusId)?.name : "Task Detail"}
+            {task?.statusId
+              ? statuses.find((s) => s.id === task.statusId)?.name
+              : 'Task Detail'}
           </Text>
         </Group>
         <Box
@@ -69,5 +77,5 @@ export function TaskDetailPanel({ taskId, onClose, statuses, members, projectId 
         </div>
       </ScrollArea>
     </Drawer>
-  );
+  )
 }

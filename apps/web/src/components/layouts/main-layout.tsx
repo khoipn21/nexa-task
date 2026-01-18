@@ -1,5 +1,5 @@
-import { Outlet } from "react-router";
-import { Sidebar } from "./sidebar";
+import { Outlet } from 'react-router'
+import { Sidebar } from './sidebar'
 
 export function MainLayout() {
   return (
@@ -16,5 +16,5 @@ export function MainLayout() {
         </div>
       </main>
     </div>
-  );
+  )
 }

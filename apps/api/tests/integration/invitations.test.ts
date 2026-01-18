@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test'
 import { invitations } from '@repo/db/schema'
-import { and, eq } from 'drizzle-orm'
 import { subDays } from 'date-fns'
+import { and, eq } from 'drizzle-orm'
 import '../setup'
 import {
   createTestInvitation,
@@ -166,7 +166,10 @@ describe('Invitation Integration Tests', () => {
         where: eq(invitations.id, invitation.id),
       })
 
-      expect(new Date(dbInvitation!.expiresAt) < new Date()).toBe(true)
+      expect(dbInvitation?.expiresAt).toBeDefined()
+      expect(new Date(dbInvitation?.expiresAt as string) < new Date()).toBe(
+        true,
+      )
     })
   })
 

@@ -134,7 +134,12 @@ export async function createNotificationWithEmail(
   }
 
   if (!prefs.enabledTypes.includes(input.type)) {
-    console.log('[Email] Skipped: type', input.type, 'not enabled for user', input.userId)
+    console.log(
+      '[Email] Skipped: type',
+      input.type,
+      'not enabled for user',
+      input.userId,
+    )
     return { notification, emailQueued: false }
   }
 

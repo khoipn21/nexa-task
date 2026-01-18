@@ -1,9 +1,6 @@
-import type { Task } from "@/hooks/use-tasks";
-import { useDroppable } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import type { Task } from '@/hooks/use-tasks'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import {
   Badge,
   Box,
@@ -12,27 +9,27 @@ import {
   Stack,
   Text,
   ThemeIcon,
-} from "@mantine/core";
-import { AddTaskInline } from "./add-task-inline";
-import { TaskCard } from "./task-card";
+} from '@mantine/core'
+import { AddTaskInline } from './add-task-inline'
+import { TaskCard } from './task-card'
 
 type Props = {
-  status: { id: string; name: string; color: string };
-  tasks: Task[];
-  projectId: string;
-  onTaskClick?: (taskId: string) => void;
-};
+  status: { id: string; name: string; color: string }
+  tasks: Task[]
+  projectId: string
+  onTaskClick?: (taskId: string) => void
+}
 
 export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
-  const { setNodeRef, isOver } = useDroppable({ id: status.id });
+  const { setNodeRef, isOver } = useDroppable({ id: status.id })
 
   return (
     <Box
       ref={setNodeRef}
       className={`w-full min-w-0 flex flex-col rounded-xl transition-colors duration-200 ${
         isOver
-          ? "bg-blue-50/50 dark:bg-blue-900/10 ring-2 ring-blue-200 dark:ring-blue-800"
-          : "bg-gray-50/50 dark:bg-dark-8/50 hover:bg-gray-100/50 dark:hover:bg-dark-8"
+          ? 'bg-blue-50/50 dark:bg-blue-900/10 ring-2 ring-blue-200 dark:ring-blue-800'
+          : 'bg-gray-50/50 dark:bg-dark-8/50 hover:bg-gray-100/50 dark:hover:bg-dark-8'
       }`}
       h="100%"
     >
@@ -51,7 +48,7 @@ export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
             size="sm"
             c="dimmed"
             tt="uppercase"
-            style={{ letterSpacing: "0.05em" }}
+            style={{ letterSpacing: '0.05em' }}
           >
             {status.name}
           </Text>
@@ -73,7 +70,7 @@ export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
         type="hover"
         offsetScrollbars
         classNames={{
-          viewport: "px-3 pb-3",
+          viewport: 'px-3 pb-3',
         }}
       >
         <SortableContext
@@ -101,5 +98,5 @@ export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
         </SortableContext>
       </ScrollArea.Autosize>
     </Box>
-  );
+  )
 }

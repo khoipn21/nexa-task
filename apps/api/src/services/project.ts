@@ -39,7 +39,7 @@ export async function getProjectsByWorkspace(
     })
     .from(tasks)
     .where(
-      sql`${tasks.projectId} IN (${sql.raw(projectsList.map((p) => `'${p.id}'`).join(',') || "''")})`
+      sql`${tasks.projectId} IN (${sql.raw(projectsList.map((p) => `'${p.id}'`).join(',') || "''")})`,
     )
     .groupBy(tasks.projectId)
 
@@ -47,7 +47,7 @@ export async function getProjectsByWorkspace(
     taskCounts.map((c) => [
       c.projectId,
       { taskCount: c.taskCount, completedTaskCount: c.completedTaskCount },
-    ])
+    ]),
   )
 
   return projectsList.map((project) => ({

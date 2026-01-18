@@ -59,7 +59,9 @@ function getS3Client(): S3Client {
 }
 
 function getBucket(): string {
-  return process.env.R2_BUCKET_NAME || process.env.S3_BUCKET || 'nexa-task-uploads'
+  return (
+    process.env.R2_BUCKET_NAME || process.env.S3_BUCKET || 'nexa-task-uploads'
+  )
 }
 
 function getPublicUrl(key: string): string {

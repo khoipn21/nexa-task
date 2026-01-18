@@ -1,5 +1,5 @@
-import { OrganizationSwitcher, UserButton } from "@clerk/clerk-react";
-import { dark } from "@clerk/themes";
+import { OrganizationSwitcher, UserButton } from '@clerk/clerk-react'
+import { dark } from '@clerk/themes'
 import {
   ActionIcon,
   Collapse,
@@ -11,7 +11,7 @@ import {
   Tooltip,
   UnstyledButton,
   useComputedColorScheme,
-} from "@mantine/core";
+} from '@mantine/core'
 import {
   IconChevronDown,
   IconChevronLeft,
@@ -20,43 +20,43 @@ import {
   IconFolder,
   IconFolders,
   IconSettings,
-} from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router";
-import { useProjects } from "../../hooks/use-projects";
-import { NotificationBell } from "../notifications";
+} from '@tabler/icons-react'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router'
+import { useProjects } from '../../hooks/use-projects'
+import { NotificationBell } from '../notifications'
 
 const navItems = [
-  { label: "Dashboard", path: "/dashboard", icon: IconDashboard },
-  { label: "Projects", path: "/projects", icon: IconFolders, hasSubmenu: true },
-  { label: "Settings", path: "/settings", icon: IconSettings },
-];
+  { label: 'Dashboard', path: '/dashboard', icon: IconDashboard },
+  { label: 'Projects', path: '/projects', icon: IconFolders, hasSubmenu: true },
+  { label: 'Settings', path: '/settings', icon: IconSettings },
+]
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [projectsOpen, setProjectsOpen] = useState(true);
-  const location = useLocation();
-  const colorScheme = useComputedColorScheme("light");
-  const { data: projects = [] } = useProjects();
+  const [collapsed, setCollapsed] = useState(false)
+  const [projectsOpen, setProjectsOpen] = useState(true)
+  const location = useLocation()
+  const colorScheme = useComputedColorScheme('light')
+  const { data: projects = [] } = useProjects()
 
   // Get 3 most recent projects (assuming default sort is relevant, or just take first 3)
-  const recentProjects = projects.slice(0, 3);
+  const recentProjects = projects.slice(0, 3)
 
-  const toggle = () => setCollapsed((c) => !c);
+  const toggle = () => setCollapsed((c) => !c)
 
   // Auto-collapse submenus when sidebar collapses
   useEffect(() => {
     if (collapsed) {
-      setProjectsOpen(false);
+      setProjectsOpen(false)
     }
-  }, [collapsed]);
+  }, [collapsed])
 
   return (
     <nav
       className={`
         relative flex flex-col h-full bg-white dark:bg-dark-7 border-r border-gray-200 dark:border-dark-4
         transition-all duration-300 ease-in-out z-50
-        ${collapsed ? "w-[80px]" : "w-[260px]"}
+        ${collapsed ? 'w-[80px]' : 'w-[260px]'}
       `}
     >
       {/* Header */}
@@ -65,22 +65,22 @@ export function Sidebar() {
           <ThemeIcon
             size={40}
             variant="gradient"
-            gradient={{ from: "blue", to: "cyan" }}
+            gradient={{ from: 'blue', to: 'cyan' }}
             className="shrink-0 rounded-xl"
           >
             <IconFolders size={24} />
           </ThemeIcon>
 
           <div
-            className={`transition-opacity duration-200 ${collapsed ? "opacity-0 w-0" : "opacity-100 flex-1"}`}
+            className={`transition-opacity duration-200 ${collapsed ? 'opacity-0 w-0' : 'opacity-100 flex-1'}`}
           >
             <Text
               fw={900}
               size="xl"
               variant="gradient"
-              gradient={{ from: "blue", to: "cyan" }}
+              gradient={{ from: 'blue', to: 'cyan' }}
               truncate
-              style={{ fontFamily: "Outfit, sans-serif" }}
+              style={{ fontFamily: 'Outfit, sans-serif' }}
             >
               Nexa Task
             </Text>
@@ -111,8 +111,8 @@ export function Sidebar() {
           {navItems.map((item) => {
             const isActive =
               location.pathname === item.path ||
-              location.pathname.startsWith(`${item.path}/`);
-            const isProjects = item.label === "Projects";
+              location.pathname.startsWith(`${item.path}/`)
+            const isProjects = item.label === 'Projects'
 
             return (
               <div key={item.path}>
@@ -131,15 +131,15 @@ export function Sidebar() {
                         w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-200 group
                         ${
                           isActive
-                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 shadow-sm"
-                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-6 hover:text-gray-900 dark:hover:text-gray-200"
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-6 hover:text-gray-900 dark:hover:text-gray-200'
                         }
                       `}
                     >
                       <item.icon
                         size={24}
                         stroke={1.5}
-                        className={`shrink-0 transition-colors ${isActive ? "text-blue-600 dark:text-blue-300" : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"}`}
+                        className={`shrink-0 transition-colors ${isActive ? 'text-blue-600 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'}`}
                       />
                       {!collapsed && (
                         <div className="flex-1 flex items-center justify-between">
@@ -152,14 +152,14 @@ export function Sidebar() {
                               size="sm"
                               className="text-gray-400 hover:text-gray-600"
                               onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setProjectsOpen(!projectsOpen);
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setProjectsOpen(!projectsOpen)
                               }}
                             >
                               <IconChevronDown
                                 size={16}
-                                className={`transition-transform duration-200 ${projectsOpen ? "rotate-180" : ""}`}
+                                className={`transition-transform duration-200 ${projectsOpen ? 'rotate-180' : ''}`}
                               />
                             </ActionIcon>
                           )}
@@ -187,8 +187,8 @@ export function Sidebar() {
                             w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors
                             ${
                               location.pathname === `/projects/${project.id}`
-                                ? "bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-300"
-                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-6 hover:text-gray-900 dark:hover:text-gray-200"
+                                ? 'bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-300'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-6 hover:text-gray-900 dark:hover:text-gray-200'
                             }
                           `}
                         >
@@ -216,14 +216,14 @@ export function Sidebar() {
                   </Collapse>
                 )}
               </div>
-            );
+            )
           })}
         </Stack>
       </ScrollArea>
 
       {/* Footer / User Profile */}
       <div className="p-4 border-t border-gray-200 dark:border-dark-4 shrink-0 bg-gray-50/50 dark:bg-dark-8/50">
-        <Stack gap="sm" align={collapsed ? "center" : "stretch"}>
+        <Stack gap="sm" align={collapsed ? 'center' : 'stretch'}>
           {collapsed ? (
             <div className="flex flex-col gap-4 items-center">
               <NotificationBell />
@@ -237,7 +237,7 @@ export function Sidebar() {
                   fw={700}
                   c="dimmed"
                   tt="uppercase"
-                  style={{ letterSpacing: "0.05em" }}
+                  style={{ letterSpacing: '0.05em' }}
                 >
                   Notifications
                 </Text>
@@ -248,23 +248,23 @@ export function Sidebar() {
                   <OrganizationSwitcher
                     hidePersonal
                     appearance={{
-                      baseTheme: colorScheme === "dark" ? dark : undefined,
+                      baseTheme: colorScheme === 'dark' ? dark : undefined,
                       elements: {
-                        rootBox: "w-full",
+                        rootBox: 'w-full',
                         organizationSwitcherTrigger:
-                          "w-full justify-between hover:bg-transparent",
+                          'w-full justify-between hover:bg-transparent',
                         organizationSwitcherTriggerIcon:
-                          colorScheme === "dark"
-                            ? "text-gray-300"
-                            : "text-gray-600",
+                          colorScheme === 'dark'
+                            ? 'text-gray-300'
+                            : 'text-gray-600',
                         userPreviewTextContainer:
-                          colorScheme === "dark"
-                            ? "text-white"
-                            : "text-gray-900",
+                          colorScheme === 'dark'
+                            ? 'text-white'
+                            : 'text-gray-900',
                         organizationPreviewTextContainer:
-                          colorScheme === "dark"
-                            ? "text-white"
-                            : "text-gray-900 font-medium",
+                          colorScheme === 'dark'
+                            ? 'text-white'
+                            : 'text-gray-900 font-medium',
                       },
                     }}
                   />
@@ -275,16 +275,16 @@ export function Sidebar() {
                     afterSignOutUrl="/sign-in"
                     showName
                     appearance={{
-                      baseTheme: colorScheme === "dark" ? dark : undefined,
+                      baseTheme: colorScheme === 'dark' ? dark : undefined,
                       elements: {
                         userPreviewTextContainer:
-                          colorScheme === "dark"
-                            ? "text-white font-medium"
-                            : "text-gray-900 font-medium",
+                          colorScheme === 'dark'
+                            ? 'text-white font-medium'
+                            : 'text-gray-900 font-medium',
                         userButtonTrigger:
-                          "w-full p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-5 transition-colors",
-                        userButtonBox: "flex-row-reverse justify-end gap-3",
-                        userButtonOuterIdentifier: "text-sm",
+                          'w-full p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-5 transition-colors',
+                        userButtonBox: 'flex-row-reverse justify-end gap-3',
+                        userButtonOuterIdentifier: 'text-sm',
                       },
                     }}
                   />
@@ -295,5 +295,5 @@ export function Sidebar() {
         </Stack>
       </div>
     </nav>
-  );
+  )
 }

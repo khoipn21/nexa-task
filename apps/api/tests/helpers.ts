@@ -136,18 +136,22 @@ export async function createTestInvitation(
     clerkInvitationId?: string | null
   } = {},
 ) {
-  const expiresAt = overrides.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const expiresAt =
+    overrides.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   const result = await testDb
     .insert(invitations)
     .values({
       workspaceId,
       inviterId,
-      inviteeEmail: overrides.inviteeEmail ?? `invite-${Date.now()}@example.com`,
+      inviteeEmail:
+        overrides.inviteeEmail ?? `invite-${Date.now()}@example.com`,
       invitationToken: `token_${Math.random().toString(36).slice(2)}`,
       role: overrides.role ?? 'member',
       status: overrides.status ?? 'pending',
       expiresAt,
-      clerkInvitationId: overrides.clerkInvitationId ?? `oi_${Math.random().toString(36).slice(2)}`,
+      clerkInvitationId:
+        overrides.clerkInvitationId ??
+        `oi_${Math.random().toString(36).slice(2)}`,
     })
     .returning()
   const invitation = result[0]

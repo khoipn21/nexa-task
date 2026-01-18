@@ -1,5 +1,5 @@
-import type { Task } from "@/hooks/use-tasks";
-import { useMoveTask, useTasks } from "@/hooks/use-tasks";
+import type { Task } from '@/hooks/use-tasks'
+import { useMoveTask, useTasks } from '@/hooks/use-tasks'
 import {
   DndContext,
   type DragEndEvent,
@@ -10,24 +10,24 @@ import {
   closestCenter,
   useSensor,
   useSensors,
-} from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useState } from "react";
-import { KanbanColumn } from "./kanban-column";
-import { TaskCard } from "./task-card";
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { useState } from 'react'
+import { KanbanColumn } from './kanban-column'
+import { TaskCard } from './task-card'
 
-type Status = { id: string; name: string; color: string };
+type Status = { id: string; name: string; color: string }
 
 type Props = {
-  projectId: string;
-  statuses: Status[];
-  onTaskClick?: (taskId: string) => void;
-};
+  projectId: string
+  statuses: Status[]
+  onTaskClick?: (taskId: string) => void
+}
 
 export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
-  const { data: tasks = [] } = useTasks(projectId);
-  const moveTask = useMoveTask();
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const { data: tasks = [] } = useTasks(projectId)
+  const moveTask = useMoveTask()
+  const [activeTask, setActiveTask] = useState<Task | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -36,48 +36,48 @@ export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
-  );
+  )
 
   const handleDragStart = (event: DragStartEvent) => {
-    const task = tasks.find((t) => t.id === event.active.id);
-    if (task) setActiveTask(task);
-  };
+    const task = tasks.find((t) => t.id === event.active.id)
+    if (task) setActiveTask(task)
+  }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveTask(null);
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    setActiveTask(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
 
-    const taskId = active.id as string;
-    const overId = over.id as string;
+    const taskId = active.id as string
+    const overId = over.id as string
 
     // Determine target status and position
     const targetStatus =
       statuses.find((s) =>
         tasks.filter((t) => t.statusId === s.id).some((t) => t.id === overId),
-      ) || statuses.find((s) => s.id === overId);
+      ) || statuses.find((s) => s.id === overId)
 
-    if (!targetStatus) return;
+    if (!targetStatus) return
 
-    const columnTasks = tasks.filter((t) => t.statusId === targetStatus.id);
-    const overIndex = columnTasks.findIndex((t) => t.id === overId);
-    const newOrder = overIndex >= 0 ? overIndex : columnTasks.length;
+    const columnTasks = tasks.filter((t) => t.statusId === targetStatus.id)
+    const overIndex = columnTasks.findIndex((t) => t.id === overId)
+    const newOrder = overIndex >= 0 ? overIndex : columnTasks.length
 
     moveTask.mutate({
       id: taskId,
       statusId: targetStatus.id,
       order: newOrder,
-    });
-  };
+    })
+  }
 
   // Group tasks by status
   const tasksByStatus = statuses.reduce(
     (acc, status) => {
-      acc[status.id] = tasks.filter((t) => t.statusId === status.id);
-      return acc;
+      acc[status.id] = tasks.filter((t) => t.statusId === status.id)
+      return acc
     },
     {} as Record<string, typeof tasks>,
-  );
+  )
 
   return (
     <DndContext
@@ -89,8 +89,8 @@ export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
       <div
         className={`flex h-full ${
           statuses.length > 5
-            ? "gap-6 overflow-x-auto pb-4 snap-x"
-            : "gap-4 w-full"
+            ? 'gap-6 overflow-x-auto pb-4 snap-x'
+            : 'gap-4 w-full'
         }`}
       >
         {statuses.map((status) => (
@@ -98,8 +98,8 @@ export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
             key={status.id}
             className={`h-full ${
               statuses.length > 5
-                ? "snap-start min-w-[300px] w-[300px]"
-                : "flex-1 min-w-0"
+                ? 'snap-start min-w-[300px] w-[300px]'
+                : 'flex-1 min-w-0'
             }`}
           >
             <KanbanColumn
@@ -115,7 +115,7 @@ export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
       <DragOverlay
         dropAnimation={{
           duration: 250,
-          easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+          easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
         }}
       >
         {activeTask && (
@@ -125,5 +125,5 @@ export function KanbanBoard({ projectId, statuses, onTaskClick }: Props) {
         )}
       </DragOverlay>
     </DndContext>
-  );
+  )
 }
