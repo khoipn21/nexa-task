@@ -1,8 +1,8 @@
-import { CreateProjectModal } from '@/components/projects/create-project-modal'
-import { ProjectList } from '@/components/projects/project-list'
+import { CreateProjectModal } from "@/components/projects/create-project-modal";
+import { ProjectList } from "@/components/projects/project-list";
 import {
-  ActionIcon,
   Button,
+  Center,
   Container,
   Group,
   SegmentedControl,
@@ -11,21 +11,21 @@ import {
   TextInput,
   Title,
   Tooltip,
-} from '@mantine/core'
-import { useDebouncedValue, useDisclosure } from '@mantine/hooks'
+} from "@mantine/core";
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import {
   IconLayoutGrid,
   IconLayoutList,
   IconPlus,
   IconSearch,
-} from '@tabler/icons-react'
-import { useState } from 'react'
+} from "@tabler/icons-react";
+import { useState } from "react";
 
 export default function Projects() {
-  const [opened, { open, close }] = useDisclosure(false)
-  const [search, setSearch] = useState('')
-  const [debouncedSearch] = useDebouncedValue(search, 300)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [opened, { open, close }] = useDisclosure(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebouncedValue(search, 300);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   return (
     <Container size="lg">
@@ -56,25 +56,25 @@ export default function Projects() {
           <Group gap="xs">
             <SegmentedControl
               value={viewMode}
-              onChange={(v) => setViewMode(v as 'grid' | 'list')}
+              onChange={(v) => setViewMode(v as "grid" | "list")}
               data={[
                 {
-                  value: 'grid',
+                  value: "grid",
                   label: (
                     <Tooltip label="Grid view">
-                      <ActionIcon variant="transparent" size="sm">
+                      <Center>
                         <IconLayoutGrid size={16} />
-                      </ActionIcon>
+                      </Center>
                     </Tooltip>
                   ),
                 },
                 {
-                  value: 'list',
+                  value: "list",
                   label: (
                     <Tooltip label="List view">
-                      <ActionIcon variant="transparent" size="sm">
+                      <Center>
                         <IconLayoutList size={16} />
-                      </ActionIcon>
+                      </Center>
                     </Tooltip>
                   ),
                 },
@@ -93,5 +93,5 @@ export default function Projects() {
         <CreateProjectModal opened={opened} onClose={close} />
       </Stack>
     </Container>
-  )
+  );
 }

@@ -8,8 +8,6 @@ import { RouterProvider } from 'react-router'
 import { AuthSync } from './lib/auth-sync'
 import { queryClient } from './lib/query-client'
 import { router } from './routes'
-import '@mantine/core/styles.layer.css'
-import '@mantine/notifications/styles.css'
 import './index.css'
 
 const CLERK_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -31,7 +29,7 @@ createRoot(rootElement).render(
     <ClerkProvider publishableKey={CLERK_KEY}>
       <AuthSync>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider theme={theme}>
+          <MantineProvider theme={theme} defaultColorScheme="auto">
             <Notifications />
             <RouterProvider router={router} />
           </MantineProvider>

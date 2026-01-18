@@ -1,14 +1,70 @@
+@import "tailwindcss";
+
+/* Layer order: Mantine styles between base and utilities */
 @layer theme, base, mantine, components, utilities;
 
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
+/* Import Mantine styles into mantine layer */
 @import "@mantine/core/styles.layer.css" layer(mantine);
-@import "tailwindcss/utilities.css" layer(utilities);
+@import "@mantine/dates/styles.css" layer(mantine);
+@import "@mantine/notifications/styles.css" layer(mantine);
 
-:root {
+/* Theme customization using v4 @theme directive */
+@theme {
   --font-family: "Inter", system-ui, sans-serif;
+
+  /* Mantine-compatible dark colors for Tailwind utilities */
+  --color-dark-3: #373a40;
+  --color-dark-4: #2c2e33;
+  --color-dark-5: #25262b;
+  --color-dark-6: #1a1b1e;
+  --color-dark-7: #141517;
+  --color-dark-8: #0c0d0f;
+  --color-dark-9: #050506;
+  --color-dark-400: #2c2e33;
+  --color-dark-600: #1a1b1e;
 }
 
 body {
   font-family: var(--font-family);
+  @apply bg-gray-50 dark:bg-dark-9 text-gray-900 dark:text-gray-100;
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--mantine-color-gray-2);
+  }
+}
+
+@layer utilities {
+  .fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-dark-4 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-dark-3;
 }

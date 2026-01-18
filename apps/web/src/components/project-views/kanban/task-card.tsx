@@ -55,7 +55,7 @@ export function TaskCard({ task, onClick, isDragOverlay }: Props) {
       withBorder
       shadow={isDragOverlay ? 'lg' : 'xs'}
       className={`
-        hover:shadow-md transition-all duration-200
+        hover:shadow-md transition-all duration-200 border-gray-200 dark:border-dark-4
         ${isDragging ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
         ${isDragOverlay ? 'rotate-2 scale-105' : ''}
       `}

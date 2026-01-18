@@ -317,6 +317,13 @@ export async function updateTask(
 
     // Notify new assignee
     if (data.assigneeId && data.assigneeId !== userId) {
+      // Get assigner name for email
+      const assigner = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { name: true },
+      })
+      const taskUrl = `${process.env.FRONTEND_URL || ''}/tasks/${taskId}`
+
       await createNotificationWithEmail(
         db,
         {
@@ -331,6 +338,9 @@ export async function updateTask(
         {
           taskTitle: existing.title,
           projectName: existing.project?.name,
+          actorName: assigner?.name || 'Someone',
+          taskUrl,
+          dueDate: existing.dueDate?.toISOString().split('T')[0],
         },
       )
     }

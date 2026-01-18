@@ -5,6 +5,7 @@ import Dashboard from './dashboard'
 import ProjectDetail from './project-detail'
 import Projects from './projects'
 import Settings from './settings'
+import TaskDetail from './task-detail'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return (
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'projects', element: <Projects /> },
       { path: 'projects/:id', element: <ProjectDetail /> },
+      { path: 'tasks/:id', element: <TaskDetail /> },
       { path: 'settings', element: <Settings /> },
     ],
   },

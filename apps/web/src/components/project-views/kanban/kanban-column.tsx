@@ -1,71 +1,99 @@
-import type { Task } from '@/hooks/use-tasks'
-import { useDroppable } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { Badge, Paper, ScrollArea, Stack, Text } from '@mantine/core'
-import { AddTaskInline } from './add-task-inline'
-import { TaskCard } from './task-card'
+import type { Task } from "@/hooks/use-tasks";
+import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  Badge,
+  Box,
+  Group,
+  ScrollArea,
+  Stack,
+  Text,
+  ThemeIcon,
+} from "@mantine/core";
+import { AddTaskInline } from "./add-task-inline";
+import { TaskCard } from "./task-card";
 
 type Props = {
-  status: { id: string; name: string; color: string }
-  tasks: Task[]
-  projectId: string
-  onTaskClick?: (taskId: string) => void
-}
+  status: { id: string; name: string; color: string };
+  tasks: Task[];
+  projectId: string;
+  onTaskClick?: (taskId: string) => void;
+};
 
 export function KanbanColumn({ status, tasks, projectId, onTaskClick }: Props) {
-  const { setNodeRef, isOver } = useDroppable({ id: status.id })
+  const { setNodeRef, isOver } = useDroppable({ id: status.id });
 
   return (
-    <Paper
+    <Box
       ref={setNodeRef}
-      className={`min-w-[300px] max-w-[300px] flex flex-col bg-gray-50 dark:bg-dark-7 ${
-        isOver ? 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20' : ''
+      className={`min-w-[300px] w-[300px] flex flex-col rounded-xl transition-colors duration-200 ${
+        isOver
+          ? "bg-blue-50/50 dark:bg-blue-900/10 ring-2 ring-blue-200 dark:ring-blue-800"
+          : "bg-gray-50/50 dark:bg-dark-8/50 hover:bg-gray-100/50 dark:hover:bg-dark-8"
       }`}
-      p="md"
-      radius="lg"
-      withBorder
-      style={{ transition: 'all 200ms ease' }}
+      h="100%"
     >
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-dark-4">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-3 h-3 rounded-full ring-2 ring-white shadow-sm"
-            style={{ backgroundColor: status.color }}
-          />
-          <Text fw={600} size="sm">
+      {/* Header */}
+      <Group
+        justify="space-between"
+        p="md"
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <Group gap="xs">
+          <ThemeIcon size="xs" radius="xl" color={status.color} variant="light">
+            <div className="w-1.5 h-1.5 rounded-full bg-current" />
+          </ThemeIcon>
+          <Text fw={700} size="sm" c="dimmed" tt="uppercase" style={{ letterSpacing: '0.05em' }}>
             {status.name}
           </Text>
-        </div>
-        <Badge variant="filled" size="sm" radius="xl" color="gray">
+        </Group>
+        <Badge
+          variant="light"
+          size="sm"
+          radius="sm"
+          color="gray"
+          className="bg-white dark:bg-dark-7 shadow-sm"
+        >
           {tasks.length}
         </Badge>
-      </div>
+      </Group>
 
-      <SortableContext
-        items={tasks.map((t) => t.id)}
-        strategy={verticalListSortingStrategy}
+      {/* Task List */}
+      <ScrollArea.Autosize
+        mah="calc(100vh - 220px)"
+        type="hover"
+        offsetScrollbars
+        classNames={{
+          viewport: "px-3 pb-3",
+        }}
       >
-        <ScrollArea.Autosize mah={500} offsetScrollbars>
-          <Stack gap="sm" className="min-h-[150px] pr-1">
-            {tasks.length === 0 && (
-              <Text size="xs" c="dimmed" ta="center" py="xl">
-                No tasks yet
-              </Text>
+        <SortableContext
+          items={tasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <Stack gap="md" className="min-h-[50px]">
+            {tasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400 dashed-border rounded-lg border-2 border-dashed border-gray-200 dark:border-dark-6">
+                <Text size="sm" c="dimmed">
+                  No tasks
+                </Text>
+              </div>
+            ) : (
+              tasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onClick={() => onTaskClick?.(task.id)}
+                />
+              ))
             )}
-            {tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onClick={() => onTaskClick?.(task.id)}
-              />
-            ))}
+            <AddTaskInline projectId={projectId} statusId={status.id} />
           </Stack>
-        </ScrollArea.Autosize>
-      </SortableContext>
-
-      <div className="mt-3 pt-2 border-t border-gray-200 dark:border-dark-4">
-        <AddTaskInline projectId={projectId} statusId={status.id} />
-      </div>
-    </Paper>
-  )
+        </SortableContext>
+      </ScrollArea.Autosize>
+    </Box>
+  );
 }
