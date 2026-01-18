@@ -114,3 +114,5 @@ secrets.json
 # Claude AI artifacts (optional - comment out if needed)
 # .claude/.venv/
 # .claude/skills/.venv/
+.env.production
+koyeb.yaml

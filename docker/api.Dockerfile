@@ -16,6 +16,7 @@ RUN bun install --frozen-lockfile --production
 
 # Stage 4: Build application
 FROM base AS builder
+RUN bun add -g turbo
 COPY --from=installer /app/ .
 COPY --from=pruner /app/out/full/ .
 RUN bun run build --filter=@repo/api

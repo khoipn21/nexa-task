@@ -1,0 +1,71 @@
+name: Deploy API to Koyeb
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/api/**'
+      - 'packages/db/**'
+      - 'packages/shared/**'
+      - 'docker/api.Dockerfile'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/api.Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Koyeb CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | bash
+          echo "$HOME/.koyeb/bin" >> $GITHUB_PATH
+
+      - name: Deploy to Koyeb
+        env:
+          KOYEB_TOKEN: ${{ secrets.KOYEB_TOKEN }}
+        run: |
+          $HOME/.koyeb/bin/koyeb service redeploy nexa-task-api --app nexa-task || \
+          echo "Service not found, create it first via Koyeb dashboard"
