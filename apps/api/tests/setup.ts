@@ -6,7 +6,8 @@ import { Pool } from 'pg'
 // Use test database
 const TEST_DB_URL =
   process.env.TEST_DATABASE_URL ||
-  'postgresql://postgres:postgres@localhost:5432/nexa_task_test'
+  process.env.DATABASE_URL ||
+  'postgresql://postgres:postgres@localhost:5433/nexa_task'
 
 const pool = new Pool({
   connectionString: TEST_DB_URL,
@@ -49,6 +50,7 @@ beforeEach(async () => {
   await testDb.delete(schema.tasks)
   await testDb.delete(schema.workflowStatuses)
   await testDb.delete(schema.projects)
+  await testDb.delete(schema.invitations)
   await testDb.delete(schema.workspaceMembers)
   await testDb.delete(schema.workspaces)
   await testDb.delete(schema.users)

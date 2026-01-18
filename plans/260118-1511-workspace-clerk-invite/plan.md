@@ -46,7 +46,7 @@ On success → User auto-added to org by Clerk → Redirect to /dashboard
 | [Phase 1](./phase-01-database-schema.md) | ✅ completed | 0.5h | Update invitations schema (add role, clerkInvitationId) |
 | [Phase 2](./phase-02-backend-api.md) | ✅ completed | 2h | Invitation API + Clerk integration |
 | [Phase 3](./phase-03-frontend-ui.md) | ✅ completed | 2.5h | Invite modal + accept-invite page |
-| [Phase 4](./phase-04-testing.md) | pending | 1h | Unit + integration tests |
+| [Phase 4](./phase-04-testing.md) | ⚠️ partial | 1h (+ 2-3h for 80% coverage) | Unit + integration tests (34 tests, ~60% coverage) |
 
 ## Key Files
 
